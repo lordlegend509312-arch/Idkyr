@@ -1,4 +1,4 @@
-</html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
-
 html, body {
     margin: 0;
     padding: 0;
@@ -20,9 +19,6 @@ html, body {
     background: linear-gradient(-45deg, #ff9acb, #ffcce6, #ff66b2, #ffb3d9);
     background-size: 400% 400%;
     animation: gradientBG 10s ease infinite;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 @keyframes gradientBG {
@@ -31,49 +27,49 @@ html, body {
     100% { background-position: 0% 50%; }
 }
 
+/* FULLSCREEN GIF CONTAINER */
 .container {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(20px);
-    padding: 30px;
-    border-radius: 30px;
-    box-shadow: 0 20px 50px rgba(255,0,102,0.4);
-    animation: fadeIn 1.5s ease;
-    transition: 0.4s;
     position: relative;
-    z-index: 2;
-    width: auto; /* Auto width for original GIF */
-    max-width: 90%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+/* GIF IMAGE */
+#bearImg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Keep aspect ratio */
+    z-index: 1;
 }
 
-/* IMAGE */
-img {
-    display: block;
-    margin: 0 auto;
-    width: auto;
-    height: auto; /* Keep original size */
-    max-width: 100%; /* Responsive */
-}
-
-/* TEXT */
+/* TEXT OVER GIF */
 h1 {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
     font-family: 'Great Vibes', cursive;
     font-size: 40px;
     color: #ff0066;
     text-shadow: 0 0 15px rgba(255,0,128,0.4);
-    margin: 20px 0 0 0;
+    margin: 0;
+    z-index: 2;
+    padding: 0 20px;
 }
 
-.buttons { margin-top: 20px; }
-
-.next-wrapper {
-    display: none;
-    margin-top: 25px;
-    text-align: right;
+/* BUTTONS OVER GIF */
+.buttons {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
 }
 
 button {
@@ -98,6 +94,15 @@ button {
 #noBtn {
     background: linear-gradient(45deg, #ff9999, #ff4d4d);
     color: white;
+}
+
+#nextWrapper {
+    display: none;
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
 }
 
 #nextBtn {
@@ -141,13 +146,10 @@ button {
 
 </style>
 </head>
-
 <body>
 
 <div class="container">
-
-    <img id="bearImg" src="main.gif">
-
+    <img id="bearImg" src="wallpaper1.jpg">
     <h1 id="mainText">Will you be my valentine? 💖</h1>
 
     <div class="buttons">
@@ -158,11 +160,9 @@ button {
     <div class="next-wrapper" id="nextWrapper">
         <button id="nextBtn">Next ➜</button>
     </div>
-
 </div>
 
 <script>
-
 /* STARS */
 setInterval(() => {
     const star = document.createElement("div");
@@ -216,16 +216,14 @@ noBtn.addEventListener("click", function() {
 
 /* YES BUTTON */
 yesBtn.addEventListener("click", function() {
-    mainText.innerText = "Happiiii happiiiiiii happpiiiiiiiiiii 🥳🥳🥳🥳😋🙈🙈🙈💋💋💋💓❤️🧡💛💚💙💜🤎💋❤️‍🩹♥️💌💕💘💝💖😍🤩🥰😘😚"; // original text
+    mainText.innerText = "Happiiii happiiiiiii happpiiiiiiiiiii 🥳🥳🥳🥳😋🙈🙈🙈💋💋💋💓❤️🧡💛💚💙💜🤎💋❤️‍🩹♥️💌💕💘💝💖😍🤩🥰😘😚";
     document.getElementById("bearImg").src = "main2.gif"; // main2.gif आपका होगा
     document.querySelector(".buttons").style.display = "none";
     nextWrapper.style.display = "block";
 
-    // Unlock scroll
     document.documentElement.style.overflow = "auto"; 
     document.body.style.overflow = "auto";
 
-    // Extra hearts
     for(let i=0;i<25;i++){
         const heart = document.createElement("div");
         heart.className = "heart";
@@ -241,7 +239,6 @@ yesBtn.addEventListener("click", function() {
 nextBtn.addEventListener("click", function() {
     window.location.href = "love.html";
 });
-
 </script>
 
 </body>
