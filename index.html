@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Theme Website</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins&family=Dancing+Script&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+margin:0;
+font-family:'Poppins', sans-serif;
+background-image:url("wallpaper.jpg");
+background-size:cover;
+background-position:center;
+color:#6B2A3A;
+}
+
+/* navbar */
+
+.navbar{
+background:#E88AA0;
+text-align:center;
+padding:15px;
+color:white;
+font-family:'Dancing Script', cursive;
+}
+
+/* hero section */
+
+.hero{
+text-align:center;
+padding:80px 20px;
+background:rgba(255,255,255,0.65);
+}
+
+.hero h2{
+font-size:40px;
+}
+
+/* button */
+
+button{
+background:#D95A7B;
+color:white;
+border:none;
+padding:12px 25px;
+border-radius:25px;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#c94b6a;
+}
+
+/* cards */
+
+.cards{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:20px;
+padding:40px;
+}
+
+.card{
+background:rgba(255,255,255,0.85);
+padding:20px;
+width:250px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+/* footer */
+
+footer{
+text-align:center;
+padding:15px;
+background:#E88AA0;
+color:white;
+}
+
+/* floating hearts */
+
+.heart{
+position:fixed;
+top:-10px;
+font-size:22px;
+animation:fall 5s linear infinite;
+}
+
+@keyframes fall{
+0%{transform:translateY(-10px);}
+100%{transform:translateY(100vh);}
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="navbar">
+<h1>Love Theme 💗</h1>
+</header>
+
+<section class="hero">
+<h2>Welcome to My Love Website</h2>
+<p>A cute romantic theme inspired by love wallpaper.</p>
+<button onclick="sendLove()">Send Love 💌</button>
+</section>
+
+<section class="cards">
+
+<div class="card">
+<h3>💌 Love Message</h3>
+<p>Love is not about how many days you spend together, but how much you care.</p>
+</div>
+
+<div class="card">
+<h3>💗 Sweet Moment</h3>
+<p>Every heartbeat reminds me of you.</p>
+</div>
+
+<div class="card">
+<h3>🌸 Forever</h3>
+<p>Real love stories never have endings.</p>
+</div>
+
+</section>
+
+<footer>
+<p>Made with ❤️</p>
+</footer>
+
+<script>
+
+function sendLove(){
+alert("Love Sent 💗");
+}
+
+setInterval(()=>{
+let heart=document.createElement("div");
+heart.className="heart";
+heart.innerHTML="💗";
+heart.style.left=Math.random()*100+"vw";
+document.body.appendChild(heart);
+
+setTimeout(()=>{
+heart.remove();
+},5000);
+
+},500);
+
+</script>
+
+</body>
+</html>
