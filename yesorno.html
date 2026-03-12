@@ -1,245 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Valentine</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Valentine</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Great+Vibes&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Great+Vibes&display=swap" rel="stylesheet">
 
-<style>
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    font-family: 'Dancing Script', cursive;
-    text-align: center;
-    user-select: none;
-    background: linear-gradient(-45deg, #ff9acb, #ffcce6, #ff66b2, #ffb3d9);
-    background-size: 400% 400%;
-    animation: gradientBG 10s ease infinite;
-}
+    <style>
+        /* ===== Body & HTML ===== */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Dancing Script', cursive;
+            text-align: center;
+            user-select: none;
+            background: linear-gradient(-45deg, #ff9acb, #ffcce6, #ff66b2, #ffb3d9);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
+        }
 
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-/* FULLSCREEN GIF CONTAINER */
-.container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+        /* ===== Container ===== */
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-/* GIF IMAGE */
-#bearImg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Keep aspect ratio */
-    z-index: 1;
-}
+        /* ===== GIF ===== */
+        #bearImg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Maintain aspect ratio */
+            z-index: 1;
+        }
 
-/* TEXT OVER GIF */
-h1 {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Great Vibes', cursive;
-    font-size: 40px;
-    color: #ff0066;
-    text-shadow: 0 0 15px rgba(255,0,128,0.4);
-    margin: 0;
-    z-index: 2;
-    padding: 0 20px;
-}
+        /* ===== Text ===== */
+        h1 {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Great Vibes', cursive;
+            font-size: 40px;
+            color: #ff0066;
+            text-shadow: 0 0 15px rgba(255,0,128,0.4);
+            margin: 0;
+            padding: 0 20px;
+            z-index: 2;
+        }
 
-/* BUTTONS OVER GIF */
-.buttons {
-    position: absolute;
-    bottom: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-}
+        /* ===== Buttons ===== */
+        .buttons {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
 
-button {
-    padding: 15px 25px;
-    font-size: 20px;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    margin: 10px;
-    transition: 0.3s;
-}
+        button {
+            padding: 15px 25px;
+            font-size: 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s;
+        }
 
-#yesBtn {
-    background: linear-gradient(45deg, #ff4da6, #ff0066);
-    color: white;
-}
-#yesBtn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px #ff1a75;
-}
+        #yesBtn {
+            background: linear-gradient(45deg, #ff4da6, #ff0066);
+            color: white;
+        }
+        #yesBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #ff1a75;
+        }
 
-#noBtn {
-    background: linear-gradient(45deg, #ff9999, #ff4d4d);
-    color: white;
-}
+        #noBtn {
+            background: linear-gradient(45deg, #ff9999, #ff4d4d);
+            color: white;
+        }
 
-#nextWrapper {
-    display: none;
-    position: absolute;
-    bottom: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-}
+        /* ===== Next Button ===== */
+        #nextWrapper {
+            display: none;
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
 
-#nextBtn {
-    padding: 10px 22px;
-    border: none;
-    border-radius: 20px;
-    background: #ff0066;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(255,0,102,0.6);
-}
+        #nextBtn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 20px;
+            background: #ff0066;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255,0,102,0.6);
+        }
 
-/* STARS */
-.star {
-    position: fixed;
-    width: 6px;
-    height: 6px;
-    background: white;
-    border-radius: 50%;
-    animation: twinkle 2s infinite alternate;
-    z-index: 0;
-}
+        /* ===== Stars ===== */
+        .star {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+            z-index: 0;
+        }
 
-@keyframes twinkle {
-    from { opacity: 0.3; transform: scale(0.5); }
-    to { opacity: 1; transform: scale(1.6); }
-}
+        @keyframes twinkle {
+            from { opacity: 0.3; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1.6); }
+        }
 
-/* HEARTS */
-.heart {
-    position: fixed;
-    font-size: 18px;
-    animation: floatUp 6s linear forwards;
-}
+        /* ===== Hearts ===== */
+        .heart {
+            position: fixed;
+            font-size: 18px;
+            animation: floatUp 6s linear forwards;
+        }
 
-@keyframes floatUp {
-    from { transform: translateY(0); opacity: 1; }
-    to { transform: translateY(-110vh); opacity: 0; }
-}
-
-</style>
+        @keyframes floatUp {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(-110vh); opacity: 0; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <img id="bearImg" src="wallpaper1.jpg">
-    <h1 id="mainText">Will you be my valentine? 💖</h1>
+    <div class="container">
+        <!-- GIF Background -->
+        <img id="bearImg" src="main.gif" alt="Valentine GIF">
 
-    <div class="buttons">
-        <button id="yesBtn">Yes</button>
-        <button id="noBtn">No</button>
+        <!-- Main Text -->
+        <h1 id="mainText">Will you be my valentine? 💖</h1>
+
+        <!-- Yes / No Buttons -->
+        <div class="buttons">
+            <button id="yesBtn">Yes</button>
+            <button id="noBtn">No</button>
+        </div>
+
+        <!-- Next Button -->
+        <div class="next-wrapper" id="nextWrapper">
+            <button id="nextBtn">Next ➜</button>
+        </div>
     </div>
 
-    <div class="next-wrapper" id="nextWrapper">
-        <button id="nextBtn">Next ➜</button>
-    </div>
-</div>
+    <script>
+        /* ===== Stars Animation ===== */
+        setInterval(() => {
+            const star = document.createElement("div");
+            star.className = "star";
+            star.style.left = Math.random() * window.innerWidth + "px";
+            star.style.top = Math.random() * window.innerHeight + "px";
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 2000);
+        }, 300);
 
-<script>
-/* STARS */
-setInterval(() => {
-    const star = document.createElement("div");
-    star.className = "star";
-    star.style.left = Math.random() * window.innerWidth + "px";
-    star.style.top = Math.random() * window.innerHeight + "px";
-    document.body.appendChild(star);
-    setTimeout(() => star.remove(), 2000);
-}, 300);
+        /* ===== Hearts Animation ===== */
+        setInterval(() => {
+            const heart = document.createElement("div");
+            heart.className = "heart";
+            heart.innerHTML = "💖";
+            heart.style.left = Math.random() * window.innerWidth + "px";
+            heart.style.bottom = "-20px";
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 6000);
+        }, 1500);
 
-/* HEARTS */
-setInterval(() => {
-    const heart = document.createElement("div");
-    heart.className = "heart";
-    heart.innerHTML = "💖";
-    heart.style.left = Math.random() * window.innerWidth + "px";
-    heart.style.bottom = "-20px";
-    document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 6000);
-}, 1500);
+        /* ===== Buttons ===== */
+        const yesBtn = document.getElementById("yesBtn");
+        const noBtn = document.getElementById("noBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const nextWrapper = document.getElementById("nextWrapper");
+        const mainText = document.getElementById("mainText");
 
-const yesBtn = document.getElementById("yesBtn");
-const noBtn = document.getElementById("noBtn");
-const nextBtn = document.getElementById("nextBtn");
-const nextWrapper = document.getElementById("nextWrapper");
-const mainText = document.getElementById("mainText");
+        let yesSize = 20;
+        let noScale = 1;
+        let noIndex = 0;
 
-let yesSize = 20;
-let noScale = 1;
-let noIndex = 0;
+        const noTexts = [
+            "Please 🥺","Oh","Hm","Okay ☺️","Sweetuuu pleaseeee ☹️","Please please please 😥",
+            "Meri cutuuu maanjao 😚","Dil tut rhaa hai..🥺☹️🥺","Prettyyy pleaseee..","Brown rasmalai plss 😡",
+            "Neet wali madam\nkya hai huhh","Meri jaan 😚","Shonuu babyy maanjao na 🥳","Okay ab bohot hora h",
+            "Marr jauga","Marr gya"
+        ];
 
-let noTexts = [
-"Please 🥺","Oh","Hm","Okay ☺️","Sweetuuu pleaseeee ☹️","Please please please 😥",
-"Meri cutuuu maanjao 😚","Dil tut rhaa hai..🥺☹️🥺","Prettyyy pleaseee..","Brown rasmalai plss 😡",
-"Neet wali madam\nkya hai huhh","Meri jaan 😚","Shonuu babyy maanjao na 🥳","Okay ab bohot hora h",
-"Marr jauga","Marr gya"
-];
+        /* ===== NO BUTTON ===== */
+        noBtn.addEventListener("click", () => {
+            if (noIndex < noTexts.length - 1) noIndex++;
+            noBtn.innerText = noTexts[noIndex];
 
-/* NO BUTTON */
-noBtn.addEventListener("click", function() {
-    if (noIndex < noTexts.length - 1) noIndex++;
-    this.innerText = noTexts[noIndex];
-    yesSize += 12;
-    yesBtn.style.fontSize = yesSize + "px";
-    yesBtn.style.padding = (yesSize/2) + "px " + yesSize + "px";
-    if(noScale > 0.25) {
-        noScale -= 0.08;
-        noBtn.style.transform = "scale(" + noScale + ")";
-    }
-});
+            yesSize += 12;
+            yesBtn.style.fontSize = yesSize + "px";
+            yesBtn.style.padding = (yesSize/2) + "px " + yesSize + "px";
 
-/* YES BUTTON */
-yesBtn.addEventListener("click", function() {
-    mainText.innerText = "Happiiii happiiiiiii happpiiiiiiiiiii 🥳🥳🥳🥳😋🙈🙈🙈💋💋💋💓❤️🧡💛💚💙💜🤎💋❤️‍🩹♥️💌💕💘💝💖😍🤩🥰😘😚";
-    document.getElementById("bearImg").src = "main2.gif"; // main2.gif आपका होगा
-    document.querySelector(".buttons").style.display = "none";
-    nextWrapper.style.display = "block";
+            if(noScale > 0.25) {
+                noScale -= 0.08;
+                noBtn.style.transform = `scale(${noScale})`;
+            }
+        });
 
-    document.documentElement.style.overflow = "auto"; 
-    document.body.style.overflow = "auto";
+        /* ===== YES BUTTON ===== */
+        yesBtn.addEventListener("click", () => {
+            mainText.innerText = "Happiiii happiiiiiii happpiiiiiiiiiii 🥳🥳🥳🥳😋🙈🙈🙈💋💋💋💓❤️🧡💛💚💙💜🤎💋❤️‍🩹♥️💌💕💘💝💖😍🤩🥰😘😚";
+            document.getElementById("bearImg").src = "main2.gif"; // Change GIF
+            document.querySelector(".buttons").style.display = "none";
+            nextWrapper.style.display = "block";
 
-    for(let i=0;i<25;i++){
-        const heart = document.createElement("div");
-        heart.className = "heart";
-        heart.innerHTML = "💖";
-        heart.style.left = Math.random() * window.innerWidth + "px";
-        heart.style.bottom = "0px";
-        document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 4000);
-    }
-});
+            document.documentElement.style.overflow = "auto";
+            document.body.style.overflow = "auto";
 
-/* NEXT BUTTON */
-nextBtn.addEventListener("click", function() {
-    window.location.href = "love.html";
-});
-</script>
+            for(let i = 0; i < 25; i++) {
+                const heart = document.createElement("div");
+                heart.className = "heart";
+                heart.innerHTML = "💖";
+                heart.style.left = Math.random() * window.innerWidth + "px";
+                heart.style.bottom = "0px";
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 4000);
+            }
+        });
+
+        /* ===== NEXT BUTTON ===== */
+        nextBtn.addEventListener("click", () => {
+            window.location.href = "love.html";
+        });
+    </script>
 
 </body>
 </html>
