@@ -19,7 +19,6 @@ box-sizing:border-box;
 body{
 overflow:hidden;
 background:black;
-font-family:sans-serif;
 }
 
 /* Container */
@@ -31,15 +30,12 @@ position:relative;
 overflow:hidden;
 }
 
-/* Slides */
+/* Reel */
 
 .reel{
 position:absolute;
 height:100%;
 width:100%;
-
-top:0;
-left:0;
 
 display:flex;
 justify-content:center;
@@ -56,15 +52,18 @@ height:100%;
 object-fit:cover;
 }
 
-/* Navigation (last slide only) */
+/* Navigation (always visible properly) */
 
 .nav-buttons{
-position:absolute;
+position:fixed;
 bottom:20px;
+left:0;
 width:100%;
+
 display:flex;
 justify-content:space-between;
 padding:0 20px;
+z-index:10;
 }
 
 button{
@@ -73,7 +72,6 @@ border:none;
 border-radius:20px;
 background:#ff4da6;
 color:white;
-font-size:14px;
 }
 
 </style>
@@ -82,66 +80,77 @@ font-size:14px;
 
 <body>
 
-<div class="container" id="container">
+<div class="container" id="container"></div>
 
-<div class="reel"><video src="edit1.mp4" muted loop></video></div>
-<div class="reel"><video src="edit2.mp4" muted loop></video></div>
-<div class="reel"><video src="edit3.mp4" muted loop></video></div>
-<div class="reel"><video src="edit4.mp4" muted loop></video></div>
-<div class="reel"><video src="edit5.mp4" muted loop></video></div>
-<div class="reel"><video src="edit6.mp4" muted loop></video></div>
-<div class="reel"><video src="edit7.mp4" muted loop></video></div>
-<div class="reel"><video src="edit8.mp4" muted loop></video></div>
-<div class="reel"><video src="edit9.mp4" muted loop></video></div>
-
-<!-- Last Reel with buttons -->
-
-<div class="reel">
-
-<video src="edit10.mp4" muted loop></video>
+<!-- Navigation -->
 
 <div class="nav-buttons">
 <button onclick="window.location.href='yesorno.html'">⬅ Previous</button>
 <button onclick="window.location.href='love3.html'">Next ➜</button>
 </div>
 
-</div>
-
-</div>
-
 <script>
+
+/* 🔥 IMPORTANT: Sirf jitni videos hain wahi add kar */
+
+const videoList = [
+"edit1.mp4",
+"edit2.mp4",
+"edit3.mp4",
+"edit4.mp4",
+"edit5.mp4",
+"edit6.mp4",
+"edit7.mp4",
+"edit8.mp4"
+// 👉 yaha bas jitni files ho utni hi likh
+];
+
+const container = document.getElementById("container");
+
+let current = 0;
+
+/* Create reels dynamically */
+
+videoList.forEach((src)=>{
+const div = document.createElement("div");
+div.className = "reel";
+
+const video = document.createElement("video");
+video.src = src;
+video.muted = true;
+video.loop = true;
+
+div.appendChild(video);
+container.appendChild(div);
+});
 
 const reels = document.querySelectorAll(".reel");
 const videos = document.querySelectorAll("video");
 
-let current = 0;
-
 /* Position reels */
 
-function updateReels(){
-reels.forEach((reel,index)=>{
-reel.style.transform = `translateY(${(index - current) * 100}%)`;
+function update(){
+reels.forEach((r,i)=>{
+r.style.transform = `translateY(${(i - current) * 100}%)`;
 });
 }
 
-/* Play only current video */
+/* Play only current */
 
-function playVideo(){
-videos.forEach((video,i)=>{
+function play(){
+videos.forEach((v,i)=>{
 if(i === current){
-video.play();
+v.play();
 }else{
-video.pause();
+v.pause();
 }
 });
 }
 
-/* Initial */
+update();
+play();
 
-updateReels();
-playVideo();
-
-/* Swipe Logic */
+/* Swipe */
 
 let startY = 0;
 
@@ -160,8 +169,8 @@ else if(diff < -50 && current > 0){
 current--;
 }
 
-updateReels();
-playVideo();
+update();
+play();
 });
 
 </script>
