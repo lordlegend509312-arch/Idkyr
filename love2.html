@@ -9,11 +9,7 @@
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
 
 body{
 overflow:hidden;
@@ -81,7 +77,7 @@ let reels = [];
 let videos = [];
 let current = 0;
 
-/* 🔥 1–10 auto check */
+/* 🔥 MAIN LOGIC */
 
 for(let i=1;i<=10;i++){
 
@@ -90,9 +86,13 @@ video.src = `edit${i}.mp4`;
 video.muted = true;
 video.loop = true;
 
-/* check if file exists */
+/* ✅ ONLY add when it CAN PLAY */
 
-video.onloadeddata = ()=>{
+video.addEventListener("canplay", ()=>{
+
+// prevent duplicate
+if(video.dataset.added) return;
+video.dataset.added = true;
 
 let div = document.createElement("div");
 div.className = "reel";
@@ -105,12 +105,13 @@ videos = document.querySelectorAll("video");
 
 update();
 play();
-};
 
-/* अगर file नहीं है → ignore */
+});
+
+/* ❌ अगर error → ignore */
 
 video.onerror = ()=>{
-// kuch nahi karna
+// kuch nahi add hoga → no black screen
 };
 
 }
@@ -123,7 +124,7 @@ r.style.transform = `translateY(${(i - current) * 100}%)`;
 });
 }
 
-/* play only visible */
+/* play */
 
 function play(){
 videos.forEach((v,i)=>{
