@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -21,8 +20,6 @@ overflow:hidden;
 background:black;
 }
 
-/* Container */
-
 .container{
 height:100vh;
 width:100%;
@@ -30,21 +27,15 @@ position:relative;
 overflow:hidden;
 }
 
-/* Reel */
-
 .reel{
 position:absolute;
 height:100%;
 width:100%;
-
 display:flex;
 justify-content:center;
 align-items:center;
-
 transition:transform 0.4s ease;
 }
-
-/* Video */
 
 video{
 width:100%;
@@ -52,14 +43,10 @@ height:100%;
 object-fit:cover;
 }
 
-/* Navigation (always visible properly) */
-
 .nav-buttons{
 position:fixed;
 bottom:20px;
-left:0;
 width:100%;
-
 display:flex;
 justify-content:space-between;
 padding:0 20px;
@@ -75,59 +62,60 @@ color:white;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <div class="container" id="container"></div>
 
-<!-- Navigation -->
-
 <div class="nav-buttons">
 <button onclick="window.location.href='yesorno.html'">⬅ Previous</button>
-<button onclick="window.location.href='love3.html'">Next ➜</button>
+<button onclick="window.location.href='love2.html'">Next ➜</button>
 </div>
 
 <script>
 
-/* 🔥 IMPORTANT: Sirf jitni videos hain wahi add kar */
-
-const videoList = [
-"edit1.mp4",
-"edit2.mp4",
-"edit3.mp4",
-"edit4.mp4",
-"edit5.mp4",
-"edit6.mp4",
-"edit7.mp4",
-"edit8.mp4"
-// 👉 yaha bas jitni files ho utni hi likh
-];
-
 const container = document.getElementById("container");
 
+let reels = [];
+let videos = [];
 let current = 0;
 
-/* Create reels dynamically */
+/* 🔥 1–10 auto check */
 
-videoList.forEach((src)=>{
-const div = document.createElement("div");
-div.className = "reel";
+for(let i=1;i<=10;i++){
 
-const video = document.createElement("video");
-video.src = src;
+let video = document.createElement("video");
+video.src = `edit${i}.mp4`;
 video.muted = true;
 video.loop = true;
 
+/* check if file exists */
+
+video.onloadeddata = ()=>{
+
+let div = document.createElement("div");
+div.className = "reel";
+
 div.appendChild(video);
 container.appendChild(div);
-});
 
-const reels = document.querySelectorAll(".reel");
-const videos = document.querySelectorAll("video");
+reels = document.querySelectorAll(".reel");
+videos = document.querySelectorAll("video");
 
-/* Position reels */
+update();
+play();
+};
+
+/* अगर file नहीं है → ignore */
+
+video.onerror = ()=>{
+// kuch nahi karna
+};
+
+}
+
+/* position */
 
 function update(){
 reels.forEach((r,i)=>{
@@ -135,7 +123,7 @@ r.style.transform = `translateY(${(i - current) * 100}%)`;
 });
 }
 
-/* Play only current */
+/* play only visible */
 
 function play(){
 videos.forEach((v,i)=>{
@@ -147,10 +135,7 @@ v.pause();
 });
 }
 
-update();
-play();
-
-/* Swipe */
+/* swipe */
 
 let startY = 0;
 
