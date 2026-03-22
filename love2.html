@@ -14,18 +14,26 @@
     width: 100%;
   }
 
-  #screen {
+  /* Two video slots — A and B, we alternate between them */
+  #slotA, #slotB {
     position: fixed;
     top: 0; left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 1;
   }
 
-  #screen video {
+  #slotA.visible, #slotB.visible {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  #slotA video, #slotB video {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -34,7 +42,7 @@
     pointer-events: none;
   }
 
-  /* ── SPINNER ── */
+  /* Spinner */
   #spinner {
     position: fixed;
     top: 50%; left: 50%;
@@ -50,7 +58,7 @@
   #spinner.show { display: block; }
   @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
 
-  /* ── TAP TO PLAY ── */
+  /* Tap to play */
   #tapPlay {
     position: fixed;
     top: 50%; left: 50%;
@@ -66,7 +74,7 @@
   }
   #tapPlay.show { display: block; }
 
-  /* ── NAV BUTTONS ── */
+  /* Nav buttons */
   #navBtns {
     position: fixed;
     bottom: 24px;
@@ -89,91 +97,64 @@
   }
   #navBtns button:active { opacity: 0.7; }
 
-  /* ══════════════════════════════
-     SWIPE HINT OVERLAY
-  ══════════════════════════════ */
+  /* Swipe hint — text only, no emoji */
   #swipeHint {
     position: fixed;
-    inset: 0;
-    z-index: 50;
+    bottom: 90px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
+    z-index: 30;
     pointer-events: none;
-    opacity: 1;
     transition: opacity 0.5s ease;
   }
 
-  #swipeHint.hide {
-    opacity: 0;
-  }
+  #swipeHint.hide { opacity: 0; }
 
-  /* Hand icon */
-  .hand {
-    font-size: 52px;
-    animation: swipeUp 1.4s ease-in-out infinite;
-    filter: drop-shadow(0 0 12px rgba(255,77,166,0.8));
-  }
-
-  /* Swipe up text */
-  .hint-text {
-    margin-top: 14px;
-    color: rgba(255,255,255,0.9);
-    font-size: 15px;
-    font-family: sans-serif;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-    animation: fadeInOut 1.4s ease-in-out infinite;
-  }
-
-  /* Lines showing swipe direction */
-  .hint-lines {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 20px;
-    animation: swipeUp 1.4s ease-in-out infinite;
-  }
-
-  .hint-line {
+  .hint-arrow {
     width: 2px;
+    background: rgba(255, 77, 166, 0.9);
     border-radius: 2px;
-    background: rgba(255,77,166,0.9);
+    animation: arrowPulse 1.4s ease-in-out infinite;
   }
-  .hint-line:nth-child(1) { height: 28px; opacity: 0.4; }
-  .hint-line:nth-child(2) { height: 20px; opacity: 0.7; }
-  .hint-line:nth-child(3) { height: 12px; opacity: 1;   }
+  .hint-arrow:nth-child(1) { height: 30px; animation-delay: 0s;    opacity: 0.3; }
+  .hint-arrow:nth-child(2) { height: 22px; animation-delay: 0.15s; opacity: 0.6; }
+  .hint-arrow:nth-child(3) { height: 14px; animation-delay: 0.3s;  opacity: 1;   }
 
-  @keyframes swipeUp {
-    0%   { transform: translateY(16px); opacity: 0.4; }
-    50%  { transform: translateY(-6px); opacity: 1;   }
-    100% { transform: translateY(16px); opacity: 0.4; }
+  .hint-label {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    font-family: sans-serif;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    animation: arrowPulse 1.4s ease-in-out infinite;
   }
 
-  @keyframes fadeInOut {
-    0%   { opacity: 0.4; }
-    50%  { opacity: 1;   }
-    100% { opacity: 0.4; }
+  @keyframes arrowPulse {
+    0%   { transform: translateY(6px);  opacity: 0.4; }
+    50%  { transform: translateY(-4px); opacity: 1;   }
+    100% { transform: translateY(6px);  opacity: 0.4; }
   }
 </style>
 </head>
 <body>
 
-<div id="screen"></div>
+<!-- Two slots for seamless crossfade, no flash -->
+<div id="slotA"><video id="vidA" loop playsinline></video></div>
+<div id="slotB"><video id="vidB" loop playsinline></video></div>
+
 <div id="spinner"></div>
 <div id="tapPlay">▶ Tap to Play</div>
 
-<!-- Swipe hint — shows on first load only -->
+<!-- Swipe hint: text only -->
 <div id="swipeHint">
-  <div class="hint-lines">
-    <div class="hint-line"></div>
-    <div class="hint-line"></div>
-    <div class="hint-line"></div>
-  </div>
-  <div class="hand">👆</div>
-  <div class="hint-text">Swipe up for next</div>
+  <div class="hint-arrow"></div>
+  <div class="hint-arrow"></div>
+  <div class="hint-arrow"></div>
+  <div class="hint-label">Swipe up</div>
 </div>
 
 <div id="navBtns">
@@ -182,25 +163,30 @@
 </div>
 
 <script>
-  const screen    = document.getElementById("screen");
   const spinner   = document.getElementById("spinner");
   const tapPlay   = document.getElementById("tapPlay");
   const swipeHint = document.getElementById("swipeHint");
 
-  let videos      = [];
-  let current     = 0;
-  let isBusy      = false;
-  let activeVid   = null;
-  let preloadNext = null;
-  let preloadPrev = null;
-  let hintShown   = true; // hint visible on first load
+  const slotA = document.getElementById("slotA");
+  const slotB = document.getElementById("slotB");
+  const vidA  = document.getElementById("vidA");
+  const vidB  = document.getElementById("vidB");
 
-  /* ── Hide swipe hint ── */
+  // Active slot tracking
+  let activeSlot = "A"; // "A" or "B"
+  let getActive  = () => activeSlot === "A" ? { slot: slotA, vid: vidA, other: slotB, otherVid: vidB } : { slot: slotB, vid: vidB, other: slotA, otherVid: vidA };
+
+  let videos   = [];
+  let current  = 0;
+  let isBusy   = false;
+  let hintDone = false;
+
+  /* ── Hide hint ── */
   function hideHint() {
-    if (!hintShown) return;
-    hintShown = false;
+    if (hintDone) return;
+    hintDone = true;
     swipeHint.classList.add("hide");
-    setTimeout(() => { swipeHint.style.display = "none"; }, 500);
+    setTimeout(() => swipeHint.style.display = "none", 500);
   }
 
   /* ══════════════════════
@@ -210,107 +196,105 @@
     const probe = document.createElement("video");
     probe.preload = "metadata";
     probe.src = `edit${index}.mp4`;
-
     probe.onloadedmetadata = () => {
       probe.src = "";
       videos.push(`edit${index}.mp4`);
       detectVideos(index + 1, done);
     };
-
-    probe.onerror = () => {
-      probe.src = "";
-      done();
-    };
+    probe.onerror = () => { probe.src = ""; done(); };
   }
 
   /* ══════════════════════
-     LOAD VIDEO
+     LOAD VIDEO — no flash
+     Uses two slots (A/B),
+     new video loads hidden,
+     then crossfades in
   ══════════════════════ */
   function loadVideo(index) {
     if (index < 0 || index >= videos.length || isBusy) return;
 
     isBusy = true;
     tapPlay.classList.remove("show");
+
+    const next = activeSlot === "A"
+      ? { slot: slotB, vid: vidB, prevSlot: slotA, prevVid: vidA }
+      : { slot: slotA, vid: vidA, prevSlot: slotB, prevVid: vidB };
+
+    // Load new video into hidden slot
+    next.vid.src        = videos[index];
+    next.vid.muted      = false;
+    next.vid.loop       = true;
+    next.vid.playsInline = true;
+    next.slot.style.opacity = "0";
+    next.slot.style.zIndex  = "1";
+
     spinner.classList.add("show");
 
-    // Destroy current
-    if (activeVid) {
-      activeVid.pause();
-      activeVid.src = "";
-      activeVid.load();
-      activeVid.remove();
-      activeVid = null;
-    }
-
-    // Use preloaded if available
-    let vid = null;
-    if (preloadNext && preloadNext._index === index) {
-      vid = preloadNext; preloadNext = null;
-    } else if (preloadPrev && preloadPrev._index === index) {
-      vid = preloadPrev; preloadPrev = null;
-    }
-
-    // Free stale preloads
-    if (preloadNext) { preloadNext.src = ""; preloadNext.load(); preloadNext = null; }
-    if (preloadPrev) { preloadPrev.src = ""; preloadPrev.load(); preloadPrev = null; }
-
-    if (!vid) {
-      vid = document.createElement("video");
-      vid.src     = videos[index];
-      vid.preload = "auto";
-    }
-
-    vid.loop        = true;
-    vid.muted       = false;
-    vid.playsInline = true;
-    vid._index      = index;
-
-    screen.appendChild(vid);
-    activeVid = vid;
-    current   = index;
-
-    // Safety unlock after 5s
     let unlockTimer = setTimeout(() => {
       spinner.classList.remove("show");
       isBusy = false;
-      schedulePreload();
     }, 5000);
 
     const onReady = () => {
       clearTimeout(unlockTimer);
       spinner.classList.remove("show");
-      isBusy = false;
-      vid.play().catch(() => tapPlay.classList.add("show"));
+
+      // Play new video
+      next.vid.play().catch(() => tapPlay.classList.add("show"));
+
+      // Crossfade: show new, hide old
+      next.slot.classList.add("visible");
+      next.slot.style.zIndex = "2";
+      next.prevSlot.classList.remove("visible");
+      next.prevSlot.style.zIndex = "1";
+
+      // Stop & clear old video after fade
+      setTimeout(() => {
+        next.prevVid.pause();
+        next.prevVid.src = "";
+        next.prevVid.load();
+      }, 300);
+
+      activeSlot = activeSlot === "A" ? "B" : "A";
+      current    = index;
+      isBusy     = false;
+
       schedulePreload();
     };
 
-    if (vid.readyState >= 3) {
+    if (next.vid.readyState >= 3) {
       onReady();
     } else {
-      vid.oncanplay = () => { vid.oncanplay = null; onReady(); };
+      next.vid.oncanplay = () => { next.vid.oncanplay = null; onReady(); };
     }
   }
 
   /* ══════════════════════
-     PRELOAD NEXT + PREV
+     PRELOAD
   ══════════════════════ */
+  let preNext = null, prePrev = null;
+
   function schedulePreload() {
     if (current + 1 < videos.length) {
-      if (!preloadNext || preloadNext._index !== current + 1) {
-        if (preloadNext) { preloadNext.src = ""; preloadNext.load(); }
-        const pn = document.createElement("video");
-        pn.src = videos[current + 1]; pn.preload = "auto";
-        pn.muted = true; pn.playsInline = true; pn._index = current + 1;
-        preloadNext = pn;
+      if (!preNext || preNext._idx !== current + 1) {
+        if (preNext) { preNext.src = ""; preNext.load(); }
+        preNext = document.createElement("video");
+        preNext.src = videos[current + 1];
+        preNext.preload = "auto";
+        preNext.muted = true;
+        preNext.playsInline = true;
+        preNext._idx = current + 1;
       }
     }
     if (current - 1 >= 0) {
-      if (!preloadPrev || preloadPrev._index !== current - 1) {
-        if (preloadPrev) { preloadPrev.src = ""; preloadPrev.load(); }
-        const pp = document.createElement("video");
-        pp.src = videos[current - 1]; pp.preload = "auto";
-        pp.muted = true; pp.playsInline = true; pp._index = current - 1;
-        preloadPrev = pp;
+      if (!prePrev || prePrev._idx !== current - 1) {
+        if (prePrev) { prePrev.src = ""; prePrev.load(); }
+        prePrev = document.createElement("video");
+        prePrev.src = videos[current - 1];
+        prePrev.preload = "auto";
+        prePrev.muted = true;
+        prePrev.playsInline = true;
+        prePrev._idx = current - 1;
       }
     }
   }
@@ -319,16 +303,15 @@
      TAP TO PLAY
   ══════════════════════ */
   tapPlay.addEventListener("click", () => {
-    if (activeVid) activeVid.play().catch(() => {});
+    const { vid } = getActive();
+    vid.play().catch(() => {});
     tapPlay.classList.remove("show");
   });
 
   /* ══════════════════════
      SWIPE
   ══════════════════════ */
-  let startX = 0;
-  let startY = 0;
-  let swiped = false;
+  let startX = 0, startY = 0, swiped = false;
 
   document.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
@@ -343,10 +326,10 @@
     const diffX = Math.abs(e.touches[0].clientX - startX);
     const diffY = startY - e.touches[0].clientY;
 
-    if (Math.abs(diffY) > 40 && diffX < 30) {
+    if (Math.abs(diffY) > 40 && diffX < 40) {
       e.preventDefault();
       swiped = true;
-      hideHint(); // hide hint on first swipe
+      hideHint();
 
       if (diffY > 0 && current < videos.length - 1) {
         loadVideo(current + 1);
@@ -358,19 +341,36 @@
     }
   }, { passive: false });
 
-  document.addEventListener("touchend", () => {
-    swiped = false;
-  }, { passive: true });
+  document.addEventListener("touchend", () => { swiped = false; }, { passive: true });
 
   /* ══════════════════════
      START
   ══════════════════════ */
   detectVideos(1, () => {
     if (videos.length === 0) {
-      screen.innerHTML = "<p style='color:white;padding:30px;font-size:16px'>Koi video nahi mili 😢</p>";
+      document.body.innerHTML = "<p style='color:white;padding:30px;font-size:16px'>Koi video nahi mili</p>";
       return;
     }
-    loadVideo(0);
+
+    // Load first video in slot A
+    vidA.src         = videos[0];
+    vidA.muted       = false;
+    vidA.loop        = true;
+    vidA.playsInline = true;
+    vidA.preload     = "auto";
+    slotA.classList.add("visible");
+
+    spinner.classList.add("show");
+
+    let t = setTimeout(() => { spinner.classList.remove("show"); isBusy = false; }, 5000);
+
+    vidA.oncanplay = () => {
+      vidA.oncanplay = null;
+      clearTimeout(t);
+      spinner.classList.remove("show");
+      vidA.play().catch(() => tapPlay.classList.add("show"));
+      schedulePreload();
+    };
   });
 </script>
 </body>
