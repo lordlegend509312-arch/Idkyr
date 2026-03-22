@@ -2,300 +2,290 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Reels ❤️</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: black;
+    background: #000;
     overflow: hidden;
-  }
-
-  .container {
     height: 100vh;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
+    width: 100vw;
+    touch-action: none;
   }
 
-  video {
+  /* ── FULL SCREEN CONTAINER ── */
+  #reelContainer {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: #000;
+  }
+
+  /* ── EACH REEL SLOT ── */
+  .reel {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .reel video {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: black;
+    background: #000;
+    display: block;
   }
 
-  /* Loading spinner */
-  .loader {
+  /* ── SPINNER ── */
+  .spinner {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 48px;
-    height: 48px;
-    border: 4px solid rgba(255,255,255,0.2);
+    width: 46px; height: 46px;
+    border: 3px solid rgba(255,255,255,0.12);
     border-top-color: #ff4da6;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 0.75s linear infinite;
     z-index: 5;
     display: none;
   }
+  .spinner.show { display: block; }
+  @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
 
-  .loader.visible { display: block; }
-
-  @keyframes spin {
-    to { transform: translate(-50%, -50%) rotate(360deg); }
-  }
-
-  /* Tap to play overlay */
-  .tap-play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
+  /* ── TAP TO PLAY ── */
+  #tapPlay {
+    position: fixed;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(255,77,166,0.85);
-    color: white;
-    padding: 14px 24px;
+    background: rgba(255,77,166,0.92);
+    color: #fff;
+    padding: 13px 26px;
     border-radius: 30px;
-    font-size: 16px;
-    font-family: sans-serif;
-    z-index: 6;
+    font-size: 15px;
+    z-index: 30;
     display: none;
     cursor: pointer;
-    user-select: none;
   }
+  #tapPlay.show { display: block; }
 
-  .tap-play.visible { display: block; }
-
-  /* Counter */
-  .counter {
+  /* ── NAV BUTTONS ── */
+  #navBtns {
     position: fixed;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255,255,255,0.75);
-    font-family: sans-serif;
-    font-size: 13px;
-    z-index: 10;
-    background: rgba(0,0,0,0.4);
-    padding: 4px 12px;
-    border-radius: 20px;
-  }
-
-  .nav-buttons {
-    position: fixed;
-    bottom: 20px;
+    bottom: 24px;
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
-    z-index: 10;
+    padding: 0 22px;
+    z-index: 30;
   }
 
-  button {
-    padding: 10px 18px;
+  #navBtns button {
+    padding: 11px 22px;
     border: none;
-    border-radius: 20px;
+    border-radius: 22px;
     background: #ff4da6;
-    color: white;
+    color: #fff;
     font-size: 14px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 4px 18px rgba(255,77,166,0.35);
   }
-
-  button:active { opacity: 0.75; }
+  #navBtns button:active { opacity: 0.75; }
 </style>
 </head>
 <body>
 
-<div class="container" id="container">
-  <div class="loader" id="loader"></div>
-  <div class="tap-play" id="tapPlay">▶ Tap to Play</div>
-</div>
+<div id="reelContainer"></div>
+<div id="tapPlay">▶ Tap to Play</div>
 
-<div class="counter" id="counter"></div>
-
-<div class="nav-buttons">
+<div id="navBtns">
   <button onclick="window.location.href='love.html'">⬅ Previous</button>
   <button onclick="window.location.href='love3.html'">Next ➜</button>
 </div>
 
 <script>
+  const reelContainer = document.getElementById("reelContainer");
+  const tapPlay       = document.getElementById("tapPlay");
 
-  const container  = document.getElementById("container");
-  const loader     = document.getElementById("loader");
-  const tapPlay    = document.getElementById("tapPlay");
-  const counterEl  = document.getElementById("counter");
+  let videos   = [];   // all detected filenames
+  let reelEls  = [];   // DOM elements for each reel
+  let current  = 0;
+  let isBusy   = false;
 
-  let videos          = [];
-  let current         = 0;
-  let currentVideo    = null;
-  let preloadedVideos = {}; // preload cache: index -> <video> element
-  let isTransitioning = false; // swipe lock
+  /* ══════════════════════════
+     STEP 1 — DETECT ALL VIDEOS
+     Tries edit1.mp4, edit2.mp4 ...
+     Stops at first missing file
+  ══════════════════════════ */
+  function detectVideos(index, callback) {
+    const probe = document.createElement("video");
+    probe.preload = "metadata";
+    probe.src     = `edit${index}.mp4`;
 
-  /* ── DETECT VIDEOS ── */
-  let i = 1;
-
-  function detect() {
-    const v = document.createElement("video");
-    v.src = `edit${i}.mp4`;
-
-    v.onloadeddata = () => {
-      videos.push(`edit${i}.mp4`);
-      v.src = ""; // free immediately after detection
-      i++;
-      detect();
+    probe.onloadedmetadata = () => {
+      probe.src = "";
+      videos.push(`edit${index}.mp4`);
+      detectVideos(index + 1, callback);
     };
 
-    v.onerror = () => {
-      v.src = "";
-      start();
+    probe.onerror = () => {
+      probe.src = "";
+      callback(); // done detecting
     };
   }
 
-  detect();
-
-  /* ── START ── */
-  function start() {
+  /* ══════════════════════════
+     STEP 2 — BUILD REEL SLOTS
+     One <div class="reel"> per video
+     Position them using translateY
+  ══════════════════════════ */
+  function buildReels() {
     if (videos.length === 0) {
-      container.innerHTML = "<p style='color:white;font-family:sans-serif;padding:20px'>No videos found</p>";
+      reelContainer.innerHTML = "<p style='color:white;padding:30px;font-size:16px'>Koi video nahi mili 😢</p>";
       return;
     }
-    current = 0;
-    loadVideo(current);
-  }
 
-  /* ── PRELOAD NEIGHBOURS ── */
-  function preloadNeighbours(index) {
-    const toPreload = [];
-    if (index + 1 < videos.length) toPreload.push(index + 1);
-    if (index - 1 >= 0)            toPreload.push(index - 1);
+    videos.forEach((src, idx) => {
+      const reel = document.createElement("div");
+      reel.className = "reel";
 
-    toPreload.forEach(idx => {
-      if (preloadedVideos[idx]) return; // already preloaded
-      const pv = document.createElement("video");
-      pv.src         = videos[idx];
-      pv.preload     = "auto";
-      pv.muted       = true; // silent background preload
-      pv.playsInline = true;
-      preloadedVideos[idx] = pv;
+      // Position: current = 0 (visible), others stacked below
+      reel.style.transform = `translateY(${idx * 100}%)`;
+
+      // Spinner
+      const spinner = document.createElement("div");
+      spinner.className = "spinner";
+      reel.appendChild(spinner);
+
+      // Video element
+      const vid = document.createElement("video");
+      vid.src         = src;
+      vid.loop        = true;
+      vid.playsInline = true;
+      vid.preload     = "auto";
+      vid.muted       = (idx !== 0); // only first unmuted initially
+      reel.appendChild(vid);
+
+      reelContainer.appendChild(reel);
+      reelEls.push(reel);
     });
 
-    // Clean up far-away cache entries to save memory
-    Object.keys(preloadedVideos).forEach(key => {
-      const k = parseInt(key);
-      if (Math.abs(k - index) > 2) {
-        preloadedVideos[k].src = "";
-        delete preloadedVideos[k];
-      }
-    });
+    // Play first video
+    playReel(0);
   }
 
-  /* ── LOAD VIDEO ── */
-  function loadVideo(index) {
-    // Bounds safety
-    if (index < 0 || index >= videos.length) return;
+  /* ══════════════════════════
+     STEP 3 — PLAY A REEL
+  ══════════════════════════ */
+  function playReel(index) {
+    const reel    = reelEls[index];
+    const vid     = reel.querySelector("video");
+    const spinner = reel.querySelector(".spinner");
 
-    isTransitioning = true;
-    loader.classList.add("visible");
-    tapPlay.classList.remove("visible");
+    // Unmute current, mute others
+    reelEls.forEach((r, i) => {
+      const v = r.querySelector("video");
+      if (v) v.muted = (i !== index);
+    });
 
-    // Cleanup old video properly
-    if (currentVideo) {
-      currentVideo.pause();
-      currentVideo.src = ""; // release media decoder memory
-      currentVideo.remove();
-      currentVideo = null;
-    }
-
-    // Use preloaded video if available, else create fresh
-    let v = preloadedVideos[index] || document.createElement("video");
-    delete preloadedVideos[index]; // remove from cache, now active
-
-    v.src         = videos[index];
-    v.autoplay    = true;
-    v.loop        = true;
-    v.muted       = false;
-    v.playsInline = true;
-    v.preload     = "auto";
-
-    // Insert before overlays so they stay on top
-    container.insertBefore(v, loader);
-    currentVideo = v;
-
-    // Update counter
-    counterEl.textContent = `${index + 1} / ${videos.length}`;
-
-    const onReady = () => {
-      loader.classList.remove("visible");
-      isTransitioning = false;
-
-      v.play().catch(err => {
-        console.warn("Autoplay blocked:", err);
-        tapPlay.classList.add("visible");
+    const tryPlay = () => {
+      spinner.classList.remove("show");
+      isBusy = false;
+      vid.play().catch(() => {
+        tapPlay.classList.add("show");
       });
-
-      preloadNeighbours(index);
     };
 
-    if (v.readyState >= 3) {
-      // Already buffered enough from preload cache
-      onReady();
+    if (vid.readyState >= 3) {
+      tryPlay();
     } else {
-      v.oncanplay = () => {
-        v.oncanplay = null;
-        onReady();
+      spinner.classList.add("show");
+      vid.oncanplay = () => {
+        vid.oncanplay = null;
+        tryPlay();
       };
     }
   }
 
-  /* ── TAP TO PLAY ── */
+  /* ══════════════════════════
+     STEP 4 — SLIDE TO INDEX
+     Moves ALL reels so current
+     is always at translateY(0)
+  ══════════════════════════ */
+  function goTo(index) {
+    if (index < 0 || index >= videos.length || isBusy) return;
+
+    isBusy = true;
+    current = index;
+
+    // Pause all except current
+    reelEls.forEach((r, i) => {
+      const v = r.querySelector("video");
+      if (v && i !== index) v.pause();
+    });
+
+    // Reposition all reels relative to current
+    reelEls.forEach((reel, i) => {
+      reel.style.transform = `translateY(${(i - index) * 100}%)`;
+    });
+
+    playReel(index);
+  }
+
+  /* ══════════════════════════
+     STEP 5 — TAP TO PLAY
+  ══════════════════════════ */
   tapPlay.addEventListener("click", () => {
-    if (currentVideo) {
-      currentVideo.play().catch(() => {});
-      tapPlay.classList.remove("visible");
-    }
+    const vid = reelEls[current].querySelector("video");
+    if (vid) vid.play().catch(() => {});
+    tapPlay.classList.remove("show");
   });
 
-  /* ── SWIPE SYSTEM (FIXED + LOCKED) ── */
-  let startY   = 0;
-  let isMoving = false;
+  /* ══════════════════════════
+     STEP 6 — SWIPE (UP/DOWN)
+  ══════════════════════════ */
+  let touchStartY = 0;
+  let didSwipe    = false;
 
   document.addEventListener("touchstart", e => {
-    if (isTransitioning) return;
-    startY   = e.touches[0].clientY;
-    isMoving = true;
+    if (isBusy) return;
+    touchStartY = e.touches[0].clientY;
+    didSwipe    = false;
   }, { passive: true });
 
   document.addEventListener("touchmove", e => {
-    if (!isMoving || isTransitioning) return;
+    if (isBusy || didSwipe) return;
 
-    const diff = startY - e.touches[0].clientY;
+    const diff = touchStartY - e.touches[0].clientY;
 
     if (Math.abs(diff) > 50) {
-      isMoving = false;
-
-      if (diff > 0 && current < videos.length - 1) {
-        current++;
-        loadVideo(current);
-      } else if (diff < 0 && current > 0) {
-        current--;
-        loadVideo(current);
+      didSwipe = true;
+      if (diff > 0) {
+        goTo(current + 1); // swipe up = next
+      } else {
+        goTo(current - 1); // swipe down = previous
       }
     }
   }, { passive: true });
 
   document.addEventListener("touchend", () => {
-    isMoving = false;
-  });
+    didSwipe = false;
+  }, { passive: true });
 
+  /* ══════════════════════════
+     START — detect then build
+  ══════════════════════════ */
+  detectVideos(1, buildReels);
 </script>
 </body>
 </html>
