@@ -12,30 +12,20 @@
 body{
 background:black;
 overflow:hidden;
+font-family:sans-serif;
 }
 
 .container{
 height:100vh;
 width:100%;
-position:relative;
-overflow:hidden;
-}
-
-.reel{
-position:absolute;
-height:100%;
-width:100%;
 display:flex;
 justify-content:center;
 align-items:center;
-background:black;
 }
 
 video{
 max-width:100%;
 max-height:100%;
-width:auto;
-height:auto;
 background:black;
 }
 
@@ -62,14 +52,37 @@ transform:translate(-50%,50%);
 color:white;
 }
 
+.nav-buttons{
+position:fixed;
+bottom:20px;
+width:100%;
+display:flex;
+justify-content:space-between;
+padding:0 20px;
+}
+
+button{
+padding:10px 18px;
+border:none;
+border-radius:20px;
+background:#ff4da6;
+color:white;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="container" id="container"></div>
+
 <div class="swipe-hint" id="hint">⬆ Swipe</div>
 <div class="tap" id="tap">Tap for sound 🔊</div>
+
+<div class="nav-buttons">
+<button onclick="window.location.href='love.html'">⬅ Previous</button>
+<button onclick="window.location.href='love3.html'">Next ➜</button>
+</div>
 
 <script>
 
@@ -77,48 +90,41 @@ const container = document.getElementById("container");
 const hint = document.getElementById("hint");
 const tap = document.getElementById("tap");
 
-const total = 10;
-let current = Math.floor(Math.random()*total);
+/* 🔥 ONLY REAL FILES PUT HERE */
+const videosList = [
+"edit1.mp4",
+"edit2.mp4",
+"edit3.mp4",
+"edit4.mp4",
+"edit5.mp4",
+"edit6.mp4"
+]; // 👈 जितनी हैं उतनी ही डाल
+
+let current = Math.floor(Math.random() * videosList.length);
 
 let sound = false;
 let swiped = false;
 
-let currentVideo = null;
-
-/* 🔥 LOAD SINGLE VIDEO */
-
-function createVideo(index){
-let video = document.createElement("video");
-video.src = `edit${index}.mp4`;
-video.loop = true;
-video.playsInline = true;
-video.muted = !sound;
-video.autoplay = true;
-video.preload = "auto";
-return video;
-}
-
-/* 🔥 RENDER ONLY CURRENT */
+/* RENDER */
 
 function render(){
 
 container.innerHTML = "";
 
-let div = document.createElement("div");
-div.className = "reel";
+let video = document.createElement("video");
+video.src = videosList[current];
+video.loop = true;
+video.playsInline = true;
+video.muted = !sound;
+video.autoplay = true;
 
-let video = createVideo(current);
-currentVideo = video;
+container.appendChild(video);
 
-div.appendChild(video);
-container.appendChild(div);
-
-/* force play */
 video.play().catch(()=>{});
 
 }
 
-/* INITIAL */
+/* INIT */
 render();
 
 /* SOUND */
@@ -127,7 +133,7 @@ document.addEventListener("click", ()=>{
 if(!sound){
 sound = true;
 tap.style.display="none";
-render(); // reload with sound
+render();
 }
 });
 
@@ -143,7 +149,7 @@ document.addEventListener("touchend",e=>{
 
 let diff = startY - e.changedTouches[0].clientY;
 
-if(diff > 50 && current < total-1){
+if(diff > 50 && current < videosList.length - 1){
 current++;
 }
 else if(diff < -50 && current > 0){
