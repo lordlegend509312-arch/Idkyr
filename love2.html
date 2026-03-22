@@ -7,17 +7,18 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
+  html, body {
     background: #000;
     overflow: hidden;
-    height: 100vh;
-    width: 100vw;
-    touch-action: none;
+    height: 100%;
+    width: 100%;
   }
 
   #screen {
     position: fixed;
-    inset: 0;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
     background: #000;
     display: flex;
     align-items: center;
@@ -29,8 +30,11 @@
     height: 100%;
     object-fit: contain;
     background: #000;
+    display: block;
+    pointer-events: none;
   }
 
+  /* ── SPINNER ── */
   #spinner {
     position: fixed;
     top: 50%; left: 50%;
@@ -46,6 +50,7 @@
   #spinner.show { display: block; }
   @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
 
+  /* ── TAP TO PLAY ── */
   #tapPlay {
     position: fixed;
     top: 50%; left: 50%;
@@ -61,6 +66,7 @@
   }
   #tapPlay.show { display: block; }
 
+  /* ── NAV BUTTONS ── */
   #navBtns {
     position: fixed;
     bottom: 24px;
@@ -70,7 +76,6 @@
     padding: 0 22px;
     z-index: 20;
   }
-
   #navBtns button {
     padding: 11px 22px;
     border: none;
@@ -83,6 +88,75 @@
     box-shadow: 0 4px 18px rgba(255,77,166,0.35);
   }
   #navBtns button:active { opacity: 0.7; }
+
+  /* ══════════════════════════════
+     SWIPE HINT OVERLAY
+  ══════════════════════════════ */
+  #swipeHint {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  #swipeHint.hide {
+    opacity: 0;
+  }
+
+  /* Hand icon */
+  .hand {
+    font-size: 52px;
+    animation: swipeUp 1.4s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(255,77,166,0.8));
+  }
+
+  /* Swipe up text */
+  .hint-text {
+    margin-top: 14px;
+    color: rgba(255,255,255,0.9);
+    font-size: 15px;
+    font-family: sans-serif;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    animation: fadeInOut 1.4s ease-in-out infinite;
+  }
+
+  /* Lines showing swipe direction */
+  .hint-lines {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 20px;
+    animation: swipeUp 1.4s ease-in-out infinite;
+  }
+
+  .hint-line {
+    width: 2px;
+    border-radius: 2px;
+    background: rgba(255,77,166,0.9);
+  }
+  .hint-line:nth-child(1) { height: 28px; opacity: 0.4; }
+  .hint-line:nth-child(2) { height: 20px; opacity: 0.7; }
+  .hint-line:nth-child(3) { height: 12px; opacity: 1;   }
+
+  @keyframes swipeUp {
+    0%   { transform: translateY(16px); opacity: 0.4; }
+    50%  { transform: translateY(-6px); opacity: 1;   }
+    100% { transform: translateY(16px); opacity: 0.4; }
+  }
+
+  @keyframes fadeInOut {
+    0%   { opacity: 0.4; }
+    50%  { opacity: 1;   }
+    100% { opacity: 0.4; }
+  }
 </style>
 </head>
 <body>
@@ -91,15 +165,27 @@
 <div id="spinner"></div>
 <div id="tapPlay">▶ Tap to Play</div>
 
+<!-- Swipe hint — shows on first load only -->
+<div id="swipeHint">
+  <div class="hint-lines">
+    <div class="hint-line"></div>
+    <div class="hint-line"></div>
+    <div class="hint-line"></div>
+  </div>
+  <div class="hand">👆</div>
+  <div class="hint-text">Swipe up for next</div>
+</div>
+
 <div id="navBtns">
   <button onclick="window.location.href='love.html'">⬅ Previous</button>
   <button onclick="window.location.href='love3.html'">Next ➜</button>
 </div>
 
 <script>
-  const screen  = document.getElementById("screen");
-  const spinner = document.getElementById("spinner");
-  const tapPlay = document.getElementById("tapPlay");
+  const screen    = document.getElementById("screen");
+  const spinner   = document.getElementById("spinner");
+  const tapPlay   = document.getElementById("tapPlay");
+  const swipeHint = document.getElementById("swipeHint");
 
   let videos      = [];
   let current     = 0;
@@ -107,82 +193,68 @@
   let activeVid   = null;
   let preloadNext = null;
   let preloadPrev = null;
-  let busyTimer   = null;
+  let hintShown   = true; // hint visible on first load
 
-  /* ══════════════════════════════════
-     FIX #5 — RELIABLE DETECTION
-     fetch HEAD — won't false-fire on
-     slow networks like video onerror
-  ══════════════════════════════════ */
+  /* ── Hide swipe hint ── */
+  function hideHint() {
+    if (!hintShown) return;
+    hintShown = false;
+    swipeHint.classList.add("hide");
+    setTimeout(() => { swipeHint.style.display = "none"; }, 500);
+  }
+
+  /* ══════════════════════
+     DETECT VIDEOS
+  ══════════════════════ */
   function detectVideos(index, done) {
-    fetch(`edit${index}.mp4`, { method: "HEAD" })
-      .then(res => {
-        if (res.ok) {
-          videos.push(`edit${index}.mp4`);
-          detectVideos(index + 1, done);
-        } else {
-          done();
-        }
-      })
-      .catch(() => done());
+    const probe = document.createElement("video");
+    probe.preload = "metadata";
+    probe.src = `edit${index}.mp4`;
+
+    probe.onloadedmetadata = () => {
+      probe.src = "";
+      videos.push(`edit${index}.mp4`);
+      detectVideos(index + 1, done);
+    };
+
+    probe.onerror = () => {
+      probe.src = "";
+      done();
+    };
   }
 
-  /* ══════════════════════════════════
-     FIX #4 — SAFE BUSY LOCK
-     Auto-unlocks after 8s so page
-     never freezes permanently
-  ══════════════════════════════════ */
-  function setBusy(val) {
-    isBusy = val;
-    clearTimeout(busyTimer);
-    if (val) {
-      busyTimer = setTimeout(() => {
-        isBusy = false;
-        spinner.classList.remove("show");
-      }, 8000);
-    }
-  }
-
-  /* ══════════════════════════════════
-     LOAD & PLAY ONE VIDEO
-  ══════════════════════════════════ */
+  /* ══════════════════════
+     LOAD VIDEO
+  ══════════════════════ */
   function loadVideo(index) {
     if (index < 0 || index >= videos.length || isBusy) return;
 
-    setBusy(true);
+    isBusy = true;
     tapPlay.classList.remove("show");
     spinner.classList.add("show");
 
-    // Fully destroy active video
+    // Destroy current
     if (activeVid) {
       activeVid.pause();
-      activeVid.oncanplay = null;
       activeVid.src = "";
       activeVid.load();
       activeVid.remove();
       activeVid = null;
     }
 
-    // FIX #2 — save old current BEFORE changing it
-    const prevCurrent = current;
-    current = index; // update FIRST, then check direction
-
-    // FIX #1 & #2 — direction check now correct
+    // Use preloaded if available
     let vid = null;
-    if (index > prevCurrent && preloadNext && preloadNext._index === index) {
-      vid = preloadNext;
-      preloadNext = null;
-    } else if (index < prevCurrent && preloadPrev && preloadPrev._index === index) {
-      vid = preloadPrev;
-      preloadPrev = null;
+    if (preloadNext && preloadNext._index === index) {
+      vid = preloadNext; preloadNext = null;
+    } else if (preloadPrev && preloadPrev._index === index) {
+      vid = preloadPrev; preloadPrev = null;
     }
 
-    // Free unused preloads
-    if (preloadNext) { preloadNext.oncanplay = null; preloadNext.src = ""; preloadNext.load(); preloadNext = null; }
-    if (preloadPrev) { preloadPrev.oncanplay = null; preloadPrev.src = ""; preloadPrev.load(); preloadPrev = null; }
+    // Free stale preloads
+    if (preloadNext) { preloadNext.src = ""; preloadNext.load(); preloadNext = null; }
+    if (preloadPrev) { preloadPrev.src = ""; preloadPrev.load(); preloadPrev = null; }
 
-    // FIX #3 — if preloaded video src is empty/stale, make fresh one
-    if (!vid || !vid.src || vid.src === "" || vid.src === window.location.href) {
+    if (!vid) {
       vid = document.createElement("video");
       vid.src     = videos[index];
       vid.preload = "auto";
@@ -195,10 +267,19 @@
 
     screen.appendChild(vid);
     activeVid = vid;
+    current   = index;
+
+    // Safety unlock after 5s
+    let unlockTimer = setTimeout(() => {
+      spinner.classList.remove("show");
+      isBusy = false;
+      schedulePreload();
+    }, 5000);
 
     const onReady = () => {
+      clearTimeout(unlockTimer);
       spinner.classList.remove("show");
-      setBusy(false);
+      isBusy = false;
       vid.play().catch(() => tapPlay.classList.add("show"));
       schedulePreload();
     };
@@ -206,92 +287,84 @@
     if (vid.readyState >= 3) {
       onReady();
     } else {
-      vid.oncanplay = () => {
-        vid.oncanplay = null;
-        onReady();
-      };
+      vid.oncanplay = () => { vid.oncanplay = null; onReady(); };
     }
   }
 
-  /* ══════════════════════════════════
-     PRELOAD NEXT + PREV ONLY
-  ══════════════════════════════════ */
+  /* ══════════════════════
+     PRELOAD NEXT + PREV
+  ══════════════════════ */
   function schedulePreload() {
-    // Next
     if (current + 1 < videos.length) {
       if (!preloadNext || preloadNext._index !== current + 1) {
         if (preloadNext) { preloadNext.src = ""; preloadNext.load(); }
-        const pn       = document.createElement("video");
-        pn.src         = videos[current + 1];
-        pn.preload     = "auto";
-        pn.muted       = true;
-        pn.playsInline = true;
-        pn._index      = current + 1;
-        preloadNext    = pn;
+        const pn = document.createElement("video");
+        pn.src = videos[current + 1]; pn.preload = "auto";
+        pn.muted = true; pn.playsInline = true; pn._index = current + 1;
+        preloadNext = pn;
       }
-    } else {
-      if (preloadNext) { preloadNext.src = ""; preloadNext.load(); preloadNext = null; }
     }
-
-    // Prev
     if (current - 1 >= 0) {
       if (!preloadPrev || preloadPrev._index !== current - 1) {
         if (preloadPrev) { preloadPrev.src = ""; preloadPrev.load(); }
-        const pp       = document.createElement("video");
-        pp.src         = videos[current - 1];
-        pp.preload     = "auto";
-        pp.muted       = true;
-        pp.playsInline = true;
-        pp._index      = current - 1;
-        preloadPrev    = pp;
+        const pp = document.createElement("video");
+        pp.src = videos[current - 1]; pp.preload = "auto";
+        pp.muted = true; pp.playsInline = true; pp._index = current - 1;
+        preloadPrev = pp;
       }
-    } else {
-      if (preloadPrev) { preloadPrev.src = ""; preloadPrev.load(); preloadPrev = null; }
     }
   }
 
-  /* ══════════════════════════════════
+  /* ══════════════════════
      TAP TO PLAY
-  ══════════════════════════════════ */
+  ══════════════════════ */
   tapPlay.addEventListener("click", () => {
     if (activeVid) activeVid.play().catch(() => {});
     tapPlay.classList.remove("show");
   });
 
-  /* ══════════════════════════════════
-     SWIPE UP / DOWN
-  ══════════════════════════════════ */
+  /* ══════════════════════
+     SWIPE
+  ══════════════════════ */
+  let startX = 0;
   let startY = 0;
   let swiped = false;
 
   document.addEventListener("touchstart", e => {
-    if (isBusy) return;
+    startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     swiped = false;
-  }, { passive: true });
+  }, { passive: false });
 
   document.addEventListener("touchmove", e => {
-    if (isBusy || swiped) return;
-    const diff = startY - e.touches[0].clientY;
-    if (Math.abs(diff) > 50) {
+    if (swiped) { e.preventDefault(); return; }
+    if (isBusy) return;
+
+    const diffX = Math.abs(e.touches[0].clientX - startX);
+    const diffY = startY - e.touches[0].clientY;
+
+    if (Math.abs(diffY) > 40 && diffX < 30) {
+      e.preventDefault();
       swiped = true;
-      if (diff > 0 && current < videos.length - 1) {
+      hideHint(); // hide hint on first swipe
+
+      if (diffY > 0 && current < videos.length - 1) {
         loadVideo(current + 1);
-      } else if (diff < 0 && current > 0) {
+      } else if (diffY < 0 && current > 0) {
         loadVideo(current - 1);
       } else {
-        setBusy(false); // first or last video edge case
+        isBusy = false;
       }
     }
-  }, { passive: true });
+  }, { passive: false });
 
   document.addEventListener("touchend", () => {
     swiped = false;
   }, { passive: true });
 
-  /* ══════════════════════════════════
+  /* ══════════════════════
      START
-  ══════════════════════════════════ */
+  ══════════════════════ */
   detectVideos(1, () => {
     if (videos.length === 0) {
       screen.innerHTML = "<p style='color:white;padding:30px;font-size:16px'>Koi video nahi mili 😢</p>";
