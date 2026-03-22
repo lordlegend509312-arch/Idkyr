@@ -12,34 +12,34 @@
 body{
 background:black;
 overflow:hidden;
-touch-action:none; /* 🔥 IMPORTANT */
 }
+
+/* container */
 
 .container{
 height:100vh;
 width:100%;
+display:flex;
+justify-content:center;
+align-items:center;
 position:relative;
 overflow:hidden;
 }
 
-/* FIXED VIDEO DISPLAY */
+/* VIDEO FIX (NO ZOOM + FULL FIT) */
+
 video{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-max-width:100%;
-max-height:100%;
+width:100%;
+height:100%;
 object-fit:contain;
+position:absolute;
+top:0;
+left:0;
 background:black;
 }
 
-/* animation */
-.slide-up{ transform:translate(-50%,-150%); transition:0.4s; }
-.slide-center{ transform:translate(-50%,-50%); transition:0.4s; }
-.slide-down{ transform:translate(-50%,50%); transition:0.4s; }
-
 /* buttons */
+
 .nav-buttons{
 position:fixed;
 bottom:20px;
@@ -57,7 +57,6 @@ border-radius:20px;
 background:#ff4da6;
 color:white;
 }
-
 </style>
 </head>
 
@@ -75,126 +74,105 @@ color:white;
 const container = document.getElementById("container");
 
 let videos = [];
-let index = 0;
+let current = 0;
+let currentVideo = null;
 
-/* 🔥 AUTO DETECT */
-let i=1;
+/* 🔥 DETECT VIDEOS PROPERLY */
+
+let i = 1;
+
 function detect(){
-let v=document.createElement("video");
-v.src=`edit${i}.mp4`;
+    let v = document.createElement("video");
+    v.src = `edit${i}.mp4`;
 
-v.onloadeddata=()=>{
-videos.push(`edit${i}.mp4`);
-i++;
-detect();
-};
+    v.onloadeddata = ()=>{
+        videos.push(`edit${i}.mp4`);
+        i++;
+        detect();
+    };
 
-v.onerror=()=>start();
+    v.onerror = ()=>{
+        start();
+    };
 }
-detect();
 
-/* 🔥 CREATE VIDEO */
-function createVideo(src){
-let v=document.createElement("video");
-v.src=src;
-v.loop=true;
-v.playsInline=true;
-v.setAttribute("webkit-playsinline","true");
-v.preload="auto";
-v.muted=false;
-return v;
-}
+detect();
 
 /* START */
-let currentVideo;
 
 function start(){
 
-if(videos.length===0){
-container.innerHTML="<p style='color:white'>No videos</p>";
-return;
+    if(videos.length === 0){
+        container.innerHTML = "<p style='color:white'>No videos found</p>";
+        return;
+    }
+
+    current = 0; // 🔥 always start from first video
+    loadVideo(current);
 }
 
-/* random */
-index=Math.floor(Math.random()*videos.length);
+/* 🔥 LOAD VIDEO (STABLE) */
 
-currentVideo=createVideo(videos[index]);
-currentVideo.className="slide-center";
+function loadVideo(index){
 
-container.appendChild(currentVideo);
+    if(currentVideo){
+        currentVideo.pause();
+        currentVideo.remove();
+    }
 
-/* FORCE PLAY FIX */
-setTimeout(()=>{
-currentVideo.play().catch(()=>{});
-},100);
+    const v = document.createElement("video");
+    v.src = videos[index];
+    v.autoplay = true;
+    v.loop = true;
+    v.muted = false;
+    v.playsInline = true;
+    v.preload = "auto";
 
+    container.appendChild(v);
+
+    v.onloadeddata = ()=>{
+        v.play().catch(()=>{});
+    };
+
+    currentVideo = v;
 }
 
-/* 🔥 SWIPE FIX (IMPORTANT) */
-let startY=0;
+/* 🔥 SWIPE SYSTEM (FIXED) */
 
-document.addEventListener("touchstart",e=>{
-startY=e.touches[0].clientY;
-},{passive:true});
+let startY = 0;
+let isMoving = false;
 
-document.addEventListener("touchmove",e=>{
-e.preventDefault(); /* 🔥 FIX SCROLL ISSUE */
-},{passive:false});
+document.addEventListener("touchstart", e=>{
+    startY = e.touches[0].clientY;
+    isMoving = true;
+});
 
-document.addEventListener("touchend",e=>{
+document.addEventListener("touchmove", e=>{
+    if(!isMoving) return;
 
-let diff=startY-e.changedTouches[0].clientY;
+    let moveY = e.touches[0].clientY;
+    let diff = startY - moveY;
 
-/* NEXT */
-if(diff>70 && index<videos.length-1){
+    if(Math.abs(diff) > 50){
 
-let nextVideo=createVideo(videos[index+1]);
-nextVideo.className="slide-down";
-container.appendChild(nextVideo);
+        isMoving = false;
 
-setTimeout(()=>{
-currentVideo.className="slide-up";
-nextVideo.className="slide-center";
-},10);
+        /* NEXT */
+        if(diff > 0 && current < videos.length - 1){
+            current++;
+            loadVideo(current);
+        }
 
-setTimeout(()=>{
-currentVideo.pause();
-container.removeChild(currentVideo);
+        /* PREVIOUS */
+        else if(diff < 0 && current > 0){
+            current--;
+            loadVideo(current);
+        }
+    }
+});
 
-currentVideo=nextVideo;
-index++;
-
-currentVideo.play().catch(()=>{});
-
-},400);
-
-}
-
-/* PREV */
-else if(diff<-70 && index>0){
-
-let prevVideo=createVideo(videos[index-1]);
-prevVideo.className="slide-up";
-container.appendChild(prevVideo);
-
-setTimeout(()=>{
-currentVideo.className="slide-down";
-prevVideo.className="slide-center";
-},10);
-
-setTimeout(()=>{
-currentVideo.pause();
-container.removeChild(currentVideo);
-
-currentVideo=prevVideo;
-index--;
-
-currentVideo.play().catch(()=>{});
-
-},400);
-
-}
-
+document.addEventListener("touchend", ()=>{
+    isMoving = false;
 });
 
 </script>
