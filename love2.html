@@ -3,179 +3,299 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Reels ❤️</title>
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body{
-background:black;
-overflow:hidden;
-}
+  body {
+    background: black;
+    overflow: hidden;
+  }
 
-/* container */
+  .container {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
 
-.container{
-height:100vh;
-width:100%;
-display:flex;
-justify-content:center;
-align-items:center;
-position:relative;
-overflow:hidden;
-}
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: black;
+  }
 
-/* VIDEO FIX (NO ZOOM + FULL FIT) */
+  /* Loading spinner */
+  .loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-top-color: #ff4da6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    z-index: 5;
+    display: none;
+  }
 
-video{
-width:100%;
-height:100%;
-object-fit:contain;
-position:absolute;
-top:0;
-left:0;
-background:black;
-}
+  .loader.visible { display: block; }
 
-/* buttons */
+  @keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
 
-.nav-buttons{
-position:fixed;
-bottom:20px;
-width:100%;
-display:flex;
-justify-content:space-between;
-padding:0 20px;
-z-index:10;
-}
+  /* Tap to play overlay */
+  .tap-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255,77,166,0.85);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-family: sans-serif;
+    z-index: 6;
+    display: none;
+    cursor: pointer;
+    user-select: none;
+  }
 
-button{
-padding:10px 18px;
-border:none;
-border-radius:20px;
-background:#ff4da6;
-color:white;
-}
+  .tap-play.visible { display: block; }
+
+  /* Counter */
+  .counter {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.75);
+    font-family: sans-serif;
+    font-size: 13px;
+    z-index: 10;
+    background: rgba(0,0,0,0.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .nav-buttons {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+  }
+
+  button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 20px;
+    background: #ff4da6;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:active { opacity: 0.75; }
 </style>
 </head>
-
 <body>
 
-<div class="container" id="container"></div>
+<div class="container" id="container">
+  <div class="loader" id="loader"></div>
+  <div class="tap-play" id="tapPlay">▶ Tap to Play</div>
+</div>
+
+<div class="counter" id="counter"></div>
 
 <div class="nav-buttons">
-<button onclick="window.location.href='love.html'">⬅ Previous</button>
-<button onclick="window.location.href='love3.html'">Next ➜</button>
+  <button onclick="window.location.href='love.html'">⬅ Previous</button>
+  <button onclick="window.location.href='love3.html'">Next ➜</button>
 </div>
 
 <script>
 
-const container = document.getElementById("container");
+  const container  = document.getElementById("container");
+  const loader     = document.getElementById("loader");
+  const tapPlay    = document.getElementById("tapPlay");
+  const counterEl  = document.getElementById("counter");
 
-let videos = [];
-let current = 0;
-let currentVideo = null;
+  let videos          = [];
+  let current         = 0;
+  let currentVideo    = null;
+  let preloadedVideos = {}; // preload cache: index -> <video> element
+  let isTransitioning = false; // swipe lock
 
-/* 🔥 DETECT VIDEOS PROPERLY */
+  /* ── DETECT VIDEOS ── */
+  let i = 1;
 
-let i = 1;
-
-function detect(){
-    let v = document.createElement("video");
+  function detect() {
+    const v = document.createElement("video");
     v.src = `edit${i}.mp4`;
 
-    v.onloadeddata = ()=>{
-        videos.push(`edit${i}.mp4`);
-        i++;
-        detect();
+    v.onloadeddata = () => {
+      videos.push(`edit${i}.mp4`);
+      v.src = ""; // free immediately after detection
+      i++;
+      detect();
     };
 
-    v.onerror = ()=>{
-        start();
+    v.onerror = () => {
+      v.src = "";
+      start();
     };
-}
+  }
 
-detect();
+  detect();
 
-/* START */
-
-function start(){
-
-    if(videos.length === 0){
-        container.innerHTML = "<p style='color:white'>No videos found</p>";
-        return;
+  /* ── START ── */
+  function start() {
+    if (videos.length === 0) {
+      container.innerHTML = "<p style='color:white;font-family:sans-serif;padding:20px'>No videos found</p>";
+      return;
     }
-
-    current = 0; // 🔥 always start from first video
+    current = 0;
     loadVideo(current);
-}
+  }
 
-/* 🔥 LOAD VIDEO (STABLE) */
+  /* ── PRELOAD NEIGHBOURS ── */
+  function preloadNeighbours(index) {
+    const toPreload = [];
+    if (index + 1 < videos.length) toPreload.push(index + 1);
+    if (index - 1 >= 0)            toPreload.push(index - 1);
 
-function loadVideo(index){
+    toPreload.forEach(idx => {
+      if (preloadedVideos[idx]) return; // already preloaded
+      const pv = document.createElement("video");
+      pv.src         = videos[idx];
+      pv.preload     = "auto";
+      pv.muted       = true; // silent background preload
+      pv.playsInline = true;
+      preloadedVideos[idx] = pv;
+    });
 
-    if(currentVideo){
-        currentVideo.pause();
-        currentVideo.remove();
+    // Clean up far-away cache entries to save memory
+    Object.keys(preloadedVideos).forEach(key => {
+      const k = parseInt(key);
+      if (Math.abs(k - index) > 2) {
+        preloadedVideos[k].src = "";
+        delete preloadedVideos[k];
+      }
+    });
+  }
+
+  /* ── LOAD VIDEO ── */
+  function loadVideo(index) {
+    // Bounds safety
+    if (index < 0 || index >= videos.length) return;
+
+    isTransitioning = true;
+    loader.classList.add("visible");
+    tapPlay.classList.remove("visible");
+
+    // Cleanup old video properly
+    if (currentVideo) {
+      currentVideo.pause();
+      currentVideo.src = ""; // release media decoder memory
+      currentVideo.remove();
+      currentVideo = null;
     }
 
-    const v = document.createElement("video");
-    v.src = videos[index];
-    v.autoplay = true;
-    v.loop = true;
-    v.muted = false;
+    // Use preloaded video if available, else create fresh
+    let v = preloadedVideos[index] || document.createElement("video");
+    delete preloadedVideos[index]; // remove from cache, now active
+
+    v.src         = videos[index];
+    v.autoplay    = true;
+    v.loop        = true;
+    v.muted       = false;
     v.playsInline = true;
-    v.preload = "auto";
+    v.preload     = "auto";
 
-    container.appendChild(v);
+    // Insert before overlays so they stay on top
+    container.insertBefore(v, loader);
+    currentVideo = v;
 
-    v.onloadeddata = ()=>{
-        v.play().catch(()=>{});
+    // Update counter
+    counterEl.textContent = `${index + 1} / ${videos.length}`;
+
+    const onReady = () => {
+      loader.classList.remove("visible");
+      isTransitioning = false;
+
+      v.play().catch(err => {
+        console.warn("Autoplay blocked:", err);
+        tapPlay.classList.add("visible");
+      });
+
+      preloadNeighbours(index);
     };
 
-    currentVideo = v;
-}
-
-/* 🔥 SWIPE SYSTEM (FIXED) */
-
-let startY = 0;
-let isMoving = false;
-
-document.addEventListener("touchstart", e=>{
-    startY = e.touches[0].clientY;
-    isMoving = true;
-});
-
-document.addEventListener("touchmove", e=>{
-    if(!isMoving) return;
-
-    let moveY = e.touches[0].clientY;
-    let diff = startY - moveY;
-
-    if(Math.abs(diff) > 50){
-
-        isMoving = false;
-
-        /* NEXT */
-        if(diff > 0 && current < videos.length - 1){
-            current++;
-            loadVideo(current);
-        }
-
-        /* PREVIOUS */
-        else if(diff < 0 && current > 0){
-            current--;
-            loadVideo(current);
-        }
+    if (v.readyState >= 3) {
+      // Already buffered enough from preload cache
+      onReady();
+    } else {
+      v.oncanplay = () => {
+        v.oncanplay = null;
+        onReady();
+      };
     }
-});
+  }
 
-document.addEventListener("touchend", ()=>{
+  /* ── TAP TO PLAY ── */
+  tapPlay.addEventListener("click", () => {
+    if (currentVideo) {
+      currentVideo.play().catch(() => {});
+      tapPlay.classList.remove("visible");
+    }
+  });
+
+  /* ── SWIPE SYSTEM (FIXED + LOCKED) ── */
+  let startY   = 0;
+  let isMoving = false;
+
+  document.addEventListener("touchstart", e => {
+    if (isTransitioning) return;
+    startY   = e.touches[0].clientY;
+    isMoving = true;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", e => {
+    if (!isMoving || isTransitioning) return;
+
+    const diff = startY - e.touches[0].clientY;
+
+    if (Math.abs(diff) > 50) {
+      isMoving = false;
+
+      if (diff > 0 && current < videos.length - 1) {
+        current++;
+        loadVideo(current);
+      } else if (diff < 0 && current > 0) {
+        current--;
+        loadVideo(current);
+      }
+    }
+  }, { passive: true });
+
+  document.addEventListener("touchend", () => {
     isMoving = false;
-});
+  });
 
 </script>
-
 </body>
 </html>
