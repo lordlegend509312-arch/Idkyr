@@ -14,25 +14,29 @@ background:black;
 overflow:hidden;
 }
 
+/* container */
+
 .container{
 height:100vh;
 width:100%;
 display:flex;
 justify-content:center;
 align-items:center;
+background:black;
 position:relative;
 }
+
+/* 🔥 NO ZOOM FIX */
 
 video{
 max-width:100%;
 max-height:100%;
+object-fit:contain;
 background:black;
+position:absolute;
 }
 
-.loader{
-position:absolute;
-color:white;
-}
+/* buttons */
 
 .nav-buttons{
 position:fixed;
@@ -41,6 +45,7 @@ width:100%;
 display:flex;
 justify-content:space-between;
 padding:0 20px;
+z-index:10;
 }
 
 button{
@@ -67,57 +72,120 @@ color:white;
 
 const container = document.getElementById("container");
 
-/* 🔥 SAME LIST (IMPORTANT) */
-const videosList = [
-"edit1.mp4",
-"edit2.mp4",
-"edit3.mp4"
-];
+let videos = [];
+let current = 0;
 
-let current = Math.floor(Math.random() * videosList.length);
+/* 🔥 AUTO DETECT VIDEOS */
 
-/* RENDER */
+let i = 1;
 
-function render(){
+function detect(){
 
-container.innerHTML = "<div class='loader'>Loading...</div>";
+let v = document.createElement("video");
+v.src = `edit${i}.mp4`;
 
-let video = document.createElement("video");
-video.src = videosList[current];
-video.autoplay = true;
-video.loop = true;
-video.playsInline = true;
+v.onloadeddata = ()=>{
+videos.push(`edit${i}.mp4`);
+i++;
+detect();
+};
 
-video.onloadeddata = ()=>{
-container.innerHTML = "";
-container.appendChild(video);
-video.play().catch(()=>{});
+v.onerror = ()=>{
+start();
 };
 
 }
 
-/* INIT */
-render();
+detect();
+
+/* START */
+
+function start(){
+
+if(videos.length === 0){
+container.innerHTML = "<p style='color:white'>No videos found</p>";
+return;
+}
+
+current = Math.floor(Math.random() * videos.length);
+
+loadVideos();
+
+}
+
+/* 🔥 CORE SYSTEM */
+
+let currentVideo, nextVideo;
+
+function loadVideos(){
+
+container.innerHTML = "";
+
+/* CURRENT */
+currentVideo = document.createElement("video");
+currentVideo.src = videos[current];
+currentVideo.autoplay = true;
+currentVideo.loop = true;
+currentVideo.playsInline = true;
+
+/* NEXT PRELOAD */
+if(current < videos.length - 1){
+nextVideo = document.createElement("video");
+nextVideo.src = videos[current + 1];
+nextVideo.preload = "auto";
+nextVideo.muted = true;
+}
+
+/* SHOW CURRENT */
+container.appendChild(currentVideo);
+
+currentVideo.onloadeddata = ()=>{
+currentVideo.play().catch(()=>{});
+};
+
+}
 
 /* SWIPE */
 
 let startY = 0;
 
-document.addEventListener("touchstart",e=>{
+document.addEventListener("touchstart", e=>{
 startY = e.touches[0].clientY;
 });
 
-document.addEventListener("touchend",e=>{
+document.addEventListener("touchend", e=>{
 
 let diff = startY - e.changedTouches[0].clientY;
 
-if(diff > 50 && current < videosList.length - 1){
+/* NEXT */
+if(diff > 50 && current < videos.length - 1){
+
 current++;
-render();
+
+/* instant switch */
+container.innerHTML = "";
+container.appendChild(nextVideo);
+
+currentVideo = nextVideo;
+
+/* preload next-next */
+if(current < videos.length - 1){
+nextVideo = document.createElement("video");
+nextVideo.src = videos[current + 1];
+nextVideo.preload = "auto";
+nextVideo.muted = true;
 }
+
+currentVideo.play().catch(()=>{});
+
+}
+
+/* PREVIOUS */
 else if(diff < -50 && current > 0){
+
 current--;
-render();
+loadVideos();
+
 }
 
 });
