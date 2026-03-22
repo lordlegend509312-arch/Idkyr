@@ -3,104 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Reels ❤️</title>
 
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-    body {
-        background: #000;
-        overflow: hidden;
-        font-family: sans-serif;
-        height: 100vh;
-        width: 100vw;
-    }
+body{
+background:black;
+overflow:hidden;
+}
 
-    .container {
-        height: 100%;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #111; /* Loading ke waqt halka dark grey */
-        position: relative;
-    }
+.container{
+height:100vh;
+width:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+position:relative;
+}
 
-    video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* Isse video poori screen cover karegi */
-        opacity: 0; /* Shuru mein chhupa rahega jab tak load na ho */
-        transition: opacity 0.4s ease;
-    }
+video{
+max-width:100%;
+max-height:100%;
+background:black;
+}
 
-    /* Swipe hint */
-    .swipe-hint {
-        position: absolute;
-        bottom: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: white;
-        animation: updown 1.5s infinite;
-        z-index: 10;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
+.loader{
+position:absolute;
+color:white;
+}
 
-    @keyframes updown {
-        0% { transform: translate(-50%, 10px); opacity: 0; }
-        50% { opacity: 1; }
-        100% { transform: translate(-50%, -10px); opacity: 0; }
-    }
+.nav-buttons{
+position:fixed;
+bottom:20px;
+width:100%;
+display:flex;
+justify-content:space-between;
+padding:0 20px;
+}
 
-    .tap {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        z-index: 10;
-        background: rgba(0,0,0,0.5);
-        padding: 10px 20px;
-        border-radius: 30px;
-        pointer-events: none;
-    }
+button{
+padding:10px 18px;
+border:none;
+border-radius:20px;
+background:#ff4da6;
+color:white;
+}
 
-    /* Heart animation for Double Tap */
-    .heart {
-        position: absolute;
-        color: #ff4da6;
-        font-size: 80px;
-        animation: heartPop 0.8s ease-out forwards;
-        z-index: 100;
-        pointer-events: none;
-    }
-
-    @keyframes heartPop {
-        0% { transform: scale(0); opacity: 0; }
-        50% { transform: scale(1.2); opacity: 1; }
-        100% { transform: scale(1); opacity: 0; }
-    }
-
-    /* NAV BUTTONS */
-    .nav-buttons {
-        position: fixed;
-        bottom: 30px;
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        padding: 0 25px;
-        z-index: 20;
-    }
-
-    button {
-        padding: 12px 22px;
-        border: none;
-        border-radius: 25px;
-        background: rgba(255, 77, 166, 0.8);
-        color: white;
-        font-weight: bold;
-        backdrop-filter: blur(5px);
-    }
 </style>
 </head>
 
@@ -108,115 +58,70 @@
 
 <div class="container" id="container"></div>
 
-<div class="swipe-hint" id="hint">⬆ Swipe Up for Next</div>
-<div class="tap" id="tap">Tap for sound 🔊</div>
-
 <div class="nav-buttons">
-    <button onclick="window.location.href='love.html'">⬅ Previous</button>
-    <button onclick="window.location.href='love3.html'">Next ➜</button>
+<button onclick="window.location.href='love.html'">⬅ Previous</button>
+<button onclick="window.location.href='love3.html'">Next ➜</button>
 </div>
 
 <script>
-    const container = document.getElementById("container");
-    const hint = document.getElementById("hint");
-    const tap = document.getElementById("tap");
 
-    // Apni files yahan confirm kar lena
-    const videosList = [
-        "edit1.mp4",
-        "edit2.mp4",
-        "edit3.mp4",
-        "edit4.mp4",
-        "edit5.mp4",
-        "edit6.mp4"
-    ];
+const container = document.getElementById("container");
 
-    let current = Math.floor(Math.random() * videosList.length);
-    let sound = false;
-    let swiped = false;
+/* 🔥 SAME LIST (IMPORTANT) */
+const videosList = [
+"edit1.mp4",
+"edit2.mp4",
+"edit3.mp4"
+];
 
-    function render() {
-        // Purana video pehle hi clear mat karo (Taki black screen na dikhe)
-        const oldVideo = container.querySelector("video");
-        
-        let video = document.createElement("video");
-        video.src = videosList[current];
-        video.loop = true;
-        video.playsInline = true;
-        video.muted = !sound;
-        video.preload = "auto"; 
+let current = Math.floor(Math.random() * videosList.length);
 
-        // Jab video play hone ke liye tayyar ho (Black screen fix)
-        video.oncanplay = () => {
-            if(oldVideo) oldVideo.remove(); 
-            video.style.opacity = "1";
-            video.play().catch(()=>{});
-        };
+/* RENDER */
 
-        container.appendChild(video);
-    }
+function render(){
 
-    // Initial load
-    render();
+container.innerHTML = "<div class='loader'>Loading...</div>";
 
-    // Sound and Double Tap Like Logic
-    let lastTap = 0;
-    document.addEventListener("click", (e) => {
-        if(e.target.tagName === "BUTTON") return;
+let video = document.createElement("video");
+video.src = videosList[current];
+video.autoplay = true;
+video.loop = true;
+video.playsInline = true;
 
-        // Sound logic (Unmute without restarting)
-        const v = container.querySelector("video");
-        if(v && !sound) {
-            sound = true;
-            v.muted = false;
-            tap.style.display = "none";
-        }
+video.onloadeddata = ()=>{
+container.innerHTML = "";
+container.appendChild(video);
+video.play().catch(()=>{});
+};
 
-        // Double Tap Like Logic
-        let now = new Date().getTime();
-        let timesince = now - lastTap;
-        if((timesince < 300) && (timesince > 0)){
-            showHeart(e.clientX, e.clientY);
-        }
-        lastTap = now;
-    });
+}
 
-    function showHeart(x, y) {
-        const heart = document.createElement("div");
-        heart.innerHTML = "❤️";
-        heart.className = "heart";
-        heart.style.left = (x - 40) + "px";
-        heart.style.top = (y - 40) + "px";
-        document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 800);
-    }
+/* INIT */
+render();
 
-    // SWIPE LOGIC
-    let startY = 0;
-    document.addEventListener("touchstart", e => {
-        startY = e.touches[0].clientY;
-    }, {passive: true});
+/* SWIPE */
 
-    document.addEventListener("touchend", e => {
-        let diff = startY - e.changedTouches[0].clientY;
-        let changed = false;
+let startY = 0;
 
-        if (diff > 60 && current < videosList.length - 1) {
-            current++;
-            changed = true;
-        } else if (diff < -60 && current > 0) {
-            current--;
-            changed = true;
-        }
+document.addEventListener("touchstart",e=>{
+startY = e.touches[0].clientY;
+});
 
-        if(changed) {
-            if(!swiped) {
-                swiped = true;
-                hint.style.display = "none";
-            }
-            render();
-        }
-    });
+document.addEventListener("touchend",e=>{
+
+let diff = startY - e.changedTouches[0].clientY;
+
+if(diff > 50 && current < videosList.length - 1){
+current++;
+render();
+}
+else if(diff < -50 && current > 0){
+current--;
+render();
+}
+
+});
+
 </script>
 
 </body>
