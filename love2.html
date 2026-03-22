@@ -13,6 +13,7 @@
 body{
 overflow:hidden;
 background:black;
+font-family:sans-serif;
 }
 
 .container{
@@ -34,8 +35,28 @@ align-items:center;
 video{
 width:100%;
 height:100%;
-object-fit:contain; /* 🔥 no zoom */
+object-fit:contain;
 background:black;
+}
+
+/* swipe hint */
+
+.swipe-hint{
+position:absolute;
+bottom:80px;
+left:50%;
+transform:translateX(-50%);
+color:white;
+font-size:16px;
+opacity:0;
+z-index:20;
+animation: swipeLoop 1.2s ease infinite;
+}
+
+@keyframes swipeLoop{
+0%{transform:translate(-50%,20px); opacity:0;}
+50%{opacity:1;}
+100%{transform:translate(-50%,-20px); opacity:0;}
 }
 
 /* buttons */
@@ -58,7 +79,7 @@ background:#ff4da6;
 color:white;
 }
 
-/* tap hint */
+/* tap sound */
 
 .tap{
 position:absolute;
@@ -78,6 +99,7 @@ z-index:20;
 
 <div class="container" id="container"></div>
 
+<div class="swipe-hint" id="swipeHint">⬆ Swipe</div>
 <div class="tap" id="tap">Tap for sound 🔊</div>
 
 <div class="nav-buttons">
@@ -88,36 +110,64 @@ z-index:20;
 <script>
 
 const container = document.getElementById("container");
+const swipeHint = document.getElementById("swipeHint");
 const tapText = document.getElementById("tap");
 
 let reels = [];
 let videos = [];
 let current = 0;
 let soundEnabled = false;
+let swipedOnce = false;
 
-/* 🔥 CREATE REELS */
+/* LOAD VALID VIDEOS ONLY */
+
+let loaded = 0;
 
 for(let i=1;i<=10;i++){
-
-let div = document.createElement("div");
-div.className = "reel";
 
 let video = document.createElement("video");
 video.src = `edit${i}.mp4`;
 video.loop = true;
 video.playsInline = true;
-video.muted = true; // start muted
+video.muted = true;
+
+video.addEventListener("canplay", ()=>{
+
+if(video.dataset.added) return;
+video.dataset.added = true;
+
+let div = document.createElement("div");
+div.className = "reel";
 
 div.appendChild(video);
 container.appendChild(div);
+
+loaded++;
+
+if(loaded === 1){
+setup();
 }
+
+});
+
+video.onerror = ()=>{};
+
+}
+
+/* SETUP */
+
+function setup(){
 
 reels = document.querySelectorAll(".reel");
 videos = document.querySelectorAll("video");
 
-/* 🔥 RANDOM FIRST REEL */
-
+/* random first reel */
 current = Math.floor(Math.random() * reels.length);
+
+update(false);
+play();
+
+}
 
 /* POSITION */
 
@@ -140,18 +190,12 @@ v.pause();
 });
 }
 
-/* FIRST LOAD */
-update(false);
-play();
-
-/* 🔊 ENABLE SOUND ON TAP */
+/* SOUND ENABLE */
 
 document.addEventListener("click", ()=>{
 
 if(!soundEnabled){
-videos.forEach(v=>{
-v.muted = false;
-});
+videos.forEach(v=> v.muted = false);
 soundEnabled = true;
 tapText.style.display = "none";
 play();
@@ -168,6 +212,9 @@ startY = e.touches[0].clientY;
 });
 
 document.addEventListener("touchend", e=>{
+
+if(reels.length === 0) return;
+
 let endY = e.changedTouches[0].clientY;
 let diff = startY - endY;
 
@@ -178,8 +225,15 @@ else if(diff < -50 && current > 0){
 current--;
 }
 
+/* FIRST SWIPE → hide hint */
+if(!swipedOnce){
+swipedOnce = true;
+swipeHint.style.display = "none";
+}
+
 update(true);
 play();
+
 });
 
 </script>
