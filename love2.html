@@ -15,70 +15,52 @@
     touch-action: none;
   }
 
-  /* ── FULL SCREEN CONTAINER ── */
-  #reelContainer {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    background: #000;
-  }
-
-  /* ── EACH REEL SLOT ── */
-  .reel {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
+  #screen {
+    position: fixed;
+    inset: 0;
     background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    will-change: transform;
-    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .reel video {
+  #screen video {
     width: 100%;
     height: 100%;
     object-fit: contain;
     background: #000;
-    display: block;
   }
 
-  /* ── SPINNER ── */
-  .spinner {
-    position: absolute;
+  #spinner {
+    position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 46px; height: 46px;
-    border: 3px solid rgba(255,255,255,0.12);
+    border: 3px solid rgba(255,255,255,0.15);
     border-top-color: #ff4da6;
     border-radius: 50%;
     animation: spin 0.75s linear infinite;
-    z-index: 5;
+    z-index: 10;
     display: none;
   }
-  .spinner.show { display: block; }
+  #spinner.show { display: block; }
   @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
 
-  /* ── TAP TO PLAY ── */
   #tapPlay {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     background: rgba(255,77,166,0.92);
     color: #fff;
-    padding: 13px 26px;
+    padding: 13px 28px;
     border-radius: 30px;
     font-size: 15px;
-    z-index: 30;
+    z-index: 20;
     display: none;
     cursor: pointer;
   }
   #tapPlay.show { display: block; }
 
-  /* ── NAV BUTTONS ── */
   #navBtns {
     position: fixed;
     bottom: 24px;
@@ -86,7 +68,7 @@
     display: flex;
     justify-content: space-between;
     padding: 0 22px;
-    z-index: 30;
+    z-index: 20;
   }
 
   #navBtns button {
@@ -100,12 +82,13 @@
     -webkit-tap-highlight-color: transparent;
     box-shadow: 0 4px 18px rgba(255,77,166,0.35);
   }
-  #navBtns button:active { opacity: 0.75; }
+  #navBtns button:active { opacity: 0.7; }
 </style>
 </head>
 <body>
 
-<div id="reelContainer"></div>
+<div id="screen"></div>
+<div id="spinner"></div>
 <div id="tapPlay">▶ Tap to Play</div>
 
 <div id="navBtns">
@@ -114,178 +97,208 @@
 </div>
 
 <script>
-  const reelContainer = document.getElementById("reelContainer");
-  const tapPlay       = document.getElementById("tapPlay");
+  const screen  = document.getElementById("screen");
+  const spinner = document.getElementById("spinner");
+  const tapPlay = document.getElementById("tapPlay");
 
-  let videos   = [];   // all detected filenames
-  let reelEls  = [];   // DOM elements for each reel
-  let current  = 0;
-  let isBusy   = false;
+  let videos      = [];
+  let current     = 0;
+  let isBusy      = false;
+  let activeVid   = null;
+  let preloadNext = null;
+  let preloadPrev = null;
+  let busyTimer   = null;
 
-  /* ══════════════════════════
-     STEP 1 — DETECT ALL VIDEOS
-     Tries edit1.mp4, edit2.mp4 ...
-     Stops at first missing file
-  ══════════════════════════ */
-  function detectVideos(index, callback) {
-    const probe = document.createElement("video");
-    probe.preload = "metadata";
-    probe.src     = `edit${index}.mp4`;
-
-    probe.onloadedmetadata = () => {
-      probe.src = "";
-      videos.push(`edit${index}.mp4`);
-      detectVideos(index + 1, callback);
-    };
-
-    probe.onerror = () => {
-      probe.src = "";
-      callback(); // done detecting
-    };
+  /* ══════════════════════════════════
+     FIX #5 — RELIABLE DETECTION
+     fetch HEAD — won't false-fire on
+     slow networks like video onerror
+  ══════════════════════════════════ */
+  function detectVideos(index, done) {
+    fetch(`edit${index}.mp4`, { method: "HEAD" })
+      .then(res => {
+        if (res.ok) {
+          videos.push(`edit${index}.mp4`);
+          detectVideos(index + 1, done);
+        } else {
+          done();
+        }
+      })
+      .catch(() => done());
   }
 
-  /* ══════════════════════════
-     STEP 2 — BUILD REEL SLOTS
-     One <div class="reel"> per video
-     Position them using translateY
-  ══════════════════════════ */
-  function buildReels() {
-    if (videos.length === 0) {
-      reelContainer.innerHTML = "<p style='color:white;padding:30px;font-size:16px'>Koi video nahi mili 😢</p>";
-      return;
+  /* ══════════════════════════════════
+     FIX #4 — SAFE BUSY LOCK
+     Auto-unlocks after 8s so page
+     never freezes permanently
+  ══════════════════════════════════ */
+  function setBusy(val) {
+    isBusy = val;
+    clearTimeout(busyTimer);
+    if (val) {
+      busyTimer = setTimeout(() => {
+        isBusy = false;
+        spinner.classList.remove("show");
+      }, 8000);
+    }
+  }
+
+  /* ══════════════════════════════════
+     LOAD & PLAY ONE VIDEO
+  ══════════════════════════════════ */
+  function loadVideo(index) {
+    if (index < 0 || index >= videos.length || isBusy) return;
+
+    setBusy(true);
+    tapPlay.classList.remove("show");
+    spinner.classList.add("show");
+
+    // Fully destroy active video
+    if (activeVid) {
+      activeVid.pause();
+      activeVid.oncanplay = null;
+      activeVid.src = "";
+      activeVid.load();
+      activeVid.remove();
+      activeVid = null;
     }
 
-    videos.forEach((src, idx) => {
-      const reel = document.createElement("div");
-      reel.className = "reel";
+    // FIX #2 — save old current BEFORE changing it
+    const prevCurrent = current;
+    current = index; // update FIRST, then check direction
 
-      // Position: current = 0 (visible), others stacked below
-      reel.style.transform = `translateY(${idx * 100}%)`;
+    // FIX #1 & #2 — direction check now correct
+    let vid = null;
+    if (index > prevCurrent && preloadNext && preloadNext._index === index) {
+      vid = preloadNext;
+      preloadNext = null;
+    } else if (index < prevCurrent && preloadPrev && preloadPrev._index === index) {
+      vid = preloadPrev;
+      preloadPrev = null;
+    }
 
-      // Spinner
-      const spinner = document.createElement("div");
-      spinner.className = "spinner";
-      reel.appendChild(spinner);
+    // Free unused preloads
+    if (preloadNext) { preloadNext.oncanplay = null; preloadNext.src = ""; preloadNext.load(); preloadNext = null; }
+    if (preloadPrev) { preloadPrev.oncanplay = null; preloadPrev.src = ""; preloadPrev.load(); preloadPrev = null; }
 
-      // Video element
-      const vid = document.createElement("video");
-      vid.src         = src;
-      vid.loop        = true;
-      vid.playsInline = true;
-      vid.preload     = "auto";
-      vid.muted       = (idx !== 0); // only first unmuted initially
-      reel.appendChild(vid);
+    // FIX #3 — if preloaded video src is empty/stale, make fresh one
+    if (!vid || !vid.src || vid.src === "" || vid.src === window.location.href) {
+      vid = document.createElement("video");
+      vid.src     = videos[index];
+      vid.preload = "auto";
+    }
 
-      reelContainer.appendChild(reel);
-      reelEls.push(reel);
-    });
+    vid.loop        = true;
+    vid.muted       = false;
+    vid.playsInline = true;
+    vid._index      = index;
 
-    // Play first video
-    playReel(0);
-  }
+    screen.appendChild(vid);
+    activeVid = vid;
 
-  /* ══════════════════════════
-     STEP 3 — PLAY A REEL
-  ══════════════════════════ */
-  function playReel(index) {
-    const reel    = reelEls[index];
-    const vid     = reel.querySelector("video");
-    const spinner = reel.querySelector(".spinner");
-
-    // Unmute current, mute others
-    reelEls.forEach((r, i) => {
-      const v = r.querySelector("video");
-      if (v) v.muted = (i !== index);
-    });
-
-    const tryPlay = () => {
+    const onReady = () => {
       spinner.classList.remove("show");
-      isBusy = false;
-      vid.play().catch(() => {
-        tapPlay.classList.add("show");
-      });
+      setBusy(false);
+      vid.play().catch(() => tapPlay.classList.add("show"));
+      schedulePreload();
     };
 
     if (vid.readyState >= 3) {
-      tryPlay();
+      onReady();
     } else {
-      spinner.classList.add("show");
       vid.oncanplay = () => {
         vid.oncanplay = null;
-        tryPlay();
+        onReady();
       };
     }
   }
 
-  /* ══════════════════════════
-     STEP 4 — SLIDE TO INDEX
-     Moves ALL reels so current
-     is always at translateY(0)
-  ══════════════════════════ */
-  function goTo(index) {
-    if (index < 0 || index >= videos.length || isBusy) return;
+  /* ══════════════════════════════════
+     PRELOAD NEXT + PREV ONLY
+  ══════════════════════════════════ */
+  function schedulePreload() {
+    // Next
+    if (current + 1 < videos.length) {
+      if (!preloadNext || preloadNext._index !== current + 1) {
+        if (preloadNext) { preloadNext.src = ""; preloadNext.load(); }
+        const pn       = document.createElement("video");
+        pn.src         = videos[current + 1];
+        pn.preload     = "auto";
+        pn.muted       = true;
+        pn.playsInline = true;
+        pn._index      = current + 1;
+        preloadNext    = pn;
+      }
+    } else {
+      if (preloadNext) { preloadNext.src = ""; preloadNext.load(); preloadNext = null; }
+    }
 
-    isBusy = true;
-    current = index;
-
-    // Pause all except current
-    reelEls.forEach((r, i) => {
-      const v = r.querySelector("video");
-      if (v && i !== index) v.pause();
-    });
-
-    // Reposition all reels relative to current
-    reelEls.forEach((reel, i) => {
-      reel.style.transform = `translateY(${(i - index) * 100}%)`;
-    });
-
-    playReel(index);
+    // Prev
+    if (current - 1 >= 0) {
+      if (!preloadPrev || preloadPrev._index !== current - 1) {
+        if (preloadPrev) { preloadPrev.src = ""; preloadPrev.load(); }
+        const pp       = document.createElement("video");
+        pp.src         = videos[current - 1];
+        pp.preload     = "auto";
+        pp.muted       = true;
+        pp.playsInline = true;
+        pp._index      = current - 1;
+        preloadPrev    = pp;
+      }
+    } else {
+      if (preloadPrev) { preloadPrev.src = ""; preloadPrev.load(); preloadPrev = null; }
+    }
   }
 
-  /* ══════════════════════════
-     STEP 5 — TAP TO PLAY
-  ══════════════════════════ */
+  /* ══════════════════════════════════
+     TAP TO PLAY
+  ══════════════════════════════════ */
   tapPlay.addEventListener("click", () => {
-    const vid = reelEls[current].querySelector("video");
-    if (vid) vid.play().catch(() => {});
+    if (activeVid) activeVid.play().catch(() => {});
     tapPlay.classList.remove("show");
   });
 
-  /* ══════════════════════════
-     STEP 6 — SWIPE (UP/DOWN)
-  ══════════════════════════ */
-  let touchStartY = 0;
-  let didSwipe    = false;
+  /* ══════════════════════════════════
+     SWIPE UP / DOWN
+  ══════════════════════════════════ */
+  let startY = 0;
+  let swiped = false;
 
   document.addEventListener("touchstart", e => {
     if (isBusy) return;
-    touchStartY = e.touches[0].clientY;
-    didSwipe    = false;
+    startY = e.touches[0].clientY;
+    swiped = false;
   }, { passive: true });
 
   document.addEventListener("touchmove", e => {
-    if (isBusy || didSwipe) return;
-
-    const diff = touchStartY - e.touches[0].clientY;
-
+    if (isBusy || swiped) return;
+    const diff = startY - e.touches[0].clientY;
     if (Math.abs(diff) > 50) {
-      didSwipe = true;
-      if (diff > 0) {
-        goTo(current + 1); // swipe up = next
+      swiped = true;
+      if (diff > 0 && current < videos.length - 1) {
+        loadVideo(current + 1);
+      } else if (diff < 0 && current > 0) {
+        loadVideo(current - 1);
       } else {
-        goTo(current - 1); // swipe down = previous
+        setBusy(false); // first or last video edge case
       }
     }
   }, { passive: true });
 
   document.addEventListener("touchend", () => {
-    didSwipe = false;
+    swiped = false;
   }, { passive: true });
 
-  /* ══════════════════════════
-     START — detect then build
-  ══════════════════════════ */
-  detectVideos(1, buildReels);
+  /* ══════════════════════════════════
+     START
+  ══════════════════════════════════ */
+  detectVideos(1, () => {
+    if (videos.length === 0) {
+      screen.innerHTML = "<p style='color:white;padding:30px;font-size:16px'>Koi video nahi mili 😢</p>";
+      return;
+    }
+    loadVideo(0);
+  });
 </script>
 </body>
 </html>
