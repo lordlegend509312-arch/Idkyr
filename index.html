@@ -228,7 +228,6 @@ to{opacity:1;}
 <script>
 
 setInterval(()=>{
-
 if(document.querySelectorAll(".heart").length>30) return;
 
 const heart=document.createElement("div");
@@ -237,7 +236,6 @@ heart.innerHTML="💖";
 heart.style.left=Math.random()*window.innerWidth+"px";
 
 document.body.appendChild(heart);
-
 setTimeout(()=>heart.remove(),10000);
 
 },900);
@@ -281,8 +279,7 @@ if(passInput.type==="password"){
 passInput.type="text";
 open.style.display="block";
 closed.style.display="none";
-}
-else{
+}else{
 passInput.type="password";
 open.style.display="none";
 closed.style.display="block";
@@ -342,18 +339,22 @@ if(wrongAttempts===0) return;
 const kissCount=(hintInput.value.match(/💋/g)||[]).length;
 
 if(wrongAttempts===1 && kissCount>=1){
+
 hintText.style.display='block';
 hintBox.style.display='block';
 
 hintText.textContent="Kya mujhe hint deni chahiye...uhmm...sochne do btau ya nhi 🤔...chalo bta hi deta hu huhhh";
 hintBox.textContent="First nickname";
+
 }
 else if(wrongAttempts===2 && kissCount>=30){
+
 hintText.style.display='block';
 hintBox.style.display='block';
 
 hintText.textContent="Kya mujhe hint deni chahiye...uhmm...sochne do btau ya nhi 🤔...chalo bta hi deta hu huhhh";
 hintBox.textContent="Password capital letters me hai huhh";
+
 }
 else if(wrongAttempts>=3 && kissCount>=1 && thirdStep<thirdLines.length){
 
@@ -373,6 +374,7 @@ if(thirdStep===password.length){
 hintBox.innerHTML=thirdLines[thirdStep-1] +
 "<div class='revealed-letter'>NEETWALIMADAM</div>";
 }
+
 }
 
 hintInput.value="";
@@ -380,21 +382,40 @@ hintInput.value="";
 
 </script>
 
-<!-- 🔥 PRELOAD (SAFE) -->
+<!-- 🔥 FINAL PRELOAD (WORKING + SAFE) -->
 <script>
 (function(){
-let i=1, max=15;
-function load(){
-if(i>max) return;
-let v=new Video();
-v.src="edit"+i+".mp4";
-v.preload="auto";
-v.muted=true;
-v.load();
-v.onloadeddata=()=>{i++;load();};
-v.onerror=()=>{i++;load();};
+
+let i = 1;
+const max = 10;
+
+function preload(){
+
+if(i > max) return;
+
+let v = document.createElement("video");
+
+v.src = "edit" + i + ".mp4";
+v.preload = "auto";
+v.muted = true;
+v.style.display = "none";
+
+document.body.appendChild(v);
+
+v.onloadeddata = () => {
+i++;
+preload();
+};
+
+v.onerror = () => {
+i++;
+preload();
+};
+
 }
-load();
+
+preload();
+
 })();
 </script>
 
