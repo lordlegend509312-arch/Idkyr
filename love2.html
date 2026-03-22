@@ -7,13 +7,11 @@
 <title>Reels ❤️</title>
 
 <style>
-
 *{margin:0;padding:0;box-sizing:border-box;}
 
 body{
 background:black;
 overflow:hidden;
-font-family:sans-serif;
 }
 
 .container{
@@ -33,8 +31,6 @@ align-items:center;
 background:black;
 }
 
-/* 🔥 FIXED VIDEO (NO ZOOM EVER) */
-
 video{
 max-width:100%;
 max-height:100%;
@@ -43,25 +39,20 @@ height:auto;
 background:black;
 }
 
-/* swipe hint */
-
 .swipe-hint{
 position:absolute;
 bottom:80px;
 left:50%;
 transform:translateX(-50%);
 color:white;
-font-size:16px;
-animation: swipeLoop 1.2s ease infinite;
+animation:updown 1s infinite;
 }
 
-@keyframes swipeLoop{
-0%{transform:translate(-50%,20px); opacity:0;}
+@keyframes updown{
+0%{transform:translate(-50%,10px);opacity:0;}
 50%{opacity:1;}
-100%{transform:translate(-50%,-20px); opacity:0;}
+100%{transform:translate(-50%,-10px);opacity:0;}
 }
-
-/* tap */
 
 .tap{
 position:absolute;
@@ -71,171 +62,103 @@ transform:translate(-50%,50%);
 color:white;
 }
 
-/* buttons */
-
-.nav-buttons{
-position:fixed;
-bottom:20px;
-width:100%;
-display:flex;
-justify-content:space-between;
-padding:0 20px;
-}
-
-button{
-padding:10px 18px;
-border:none;
-border-radius:20px;
-background:#ff4da6;
-color:white;
-}
-
 </style>
 </head>
 
 <body>
 
 <div class="container" id="container"></div>
-
 <div class="swipe-hint" id="hint">⬆ Swipe</div>
 <div class="tap" id="tap">Tap for sound 🔊</div>
-
-<div class="nav-buttons">
-<button onclick="window.location.href='love.html'">⬅ Previous</button>
-<button onclick="window.location.href='love3.html'">Next ➜</button>
-</div>
 
 <script>
 
 const container = document.getElementById("container");
 const hint = document.getElementById("hint");
-const tapText = document.getElementById("tap");
+const tap = document.getElementById("tap");
 
-let reels = [];
-let videos = [];
-let current = 0;
-let soundEnabled = false;
+const total = 10;
+let current = Math.floor(Math.random()*total);
+
+let sound = false;
 let swiped = false;
 
-/* 🔥 LOAD ONLY VALID VIDEOS */
+let currentVideo = null;
 
-let added = 0;
+/* 🔥 LOAD SINGLE VIDEO */
 
-for(let i=1;i<=10;i++){
-
+function createVideo(index){
 let video = document.createElement("video");
-video.src = `edit${i}.mp4`;
+video.src = `edit${index}.mp4`;
 video.loop = true;
 video.playsInline = true;
-video.muted = true;
-video.preload = "metadata"; /* 🔥 prevent heavy preload */
+video.muted = !sound;
+video.autoplay = true;
+video.preload = "auto";
+return video;
+}
 
-video.addEventListener("loadeddata", ()=>{
+/* 🔥 RENDER ONLY CURRENT */
 
-if(video.dataset.done) return;
-video.dataset.done = true;
+function render(){
+
+container.innerHTML = "";
 
 let div = document.createElement("div");
 div.className = "reel";
 
+let video = createVideo(current);
+currentVideo = video;
+
 div.appendChild(video);
 container.appendChild(div);
 
-added++;
-
-if(added === 1){
-init();
-}
-
-});
-
-video.onerror = ()=>{};
+/* force play */
+video.play().catch(()=>{});
 
 }
 
-/* INIT */
-
-function init(){
-
-reels = document.querySelectorAll(".reel");
-videos = document.querySelectorAll("video");
-
-/* random start */
-current = Math.floor(Math.random() * reels.length);
-
-update(false);
-play();
-
-}
-
-/* POSITION */
-
-function update(animate = true){
-reels.forEach((r,i)=>{
-r.style.transition = animate ? "transform 0.35s ease" : "none";
-r.style.transform = `translateY(${(i - current) * 100}%)`;
-});
-}
-
-/* 🔥 ONLY ONE VIDEO CONTROL */
-
-function play(){
-
-videos.forEach((v,i)=>{
-v.pause();
-v.currentTime = 0; /* 🔥 reset others */
-});
-
-let v = videos[current];
-
-if(v){
-v.muted = !soundEnabled;
-v.play().catch(()=>{});
-}
-
-}
+/* INITIAL */
+render();
 
 /* SOUND */
 
 document.addEventListener("click", ()=>{
-
-if(!soundEnabled){
-soundEnabled = true;
-tapText.style.display = "none";
-play();
+if(!sound){
+sound = true;
+tap.style.display="none";
+render(); // reload with sound
 }
-
 });
 
 /* SWIPE */
 
-let startY = 0;
+let startY=0;
 
-document.addEventListener("touchstart", e=>{
+document.addEventListener("touchstart",e=>{
 startY = e.touches[0].clientY;
 });
 
-document.addEventListener("touchend", e=>{
-
-if(reels.length === 0) return;
+document.addEventListener("touchend",e=>{
 
 let diff = startY - e.changedTouches[0].clientY;
 
-if(diff > 50 && current < reels.length - 1){
+if(diff > 50 && current < total-1){
 current++;
 }
 else if(diff < -50 && current > 0){
 current--;
+}else{
+return;
 }
 
-/* hide hint after first swipe */
+/* hide hint */
 if(!swiped){
 swiped = true;
-hint.style.display = "none";
+hint.style.display="none";
 }
 
-update(true);
-play();
+render();
 
 });
 
