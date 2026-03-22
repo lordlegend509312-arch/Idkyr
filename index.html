@@ -1,7 +1,15 @@
-<!DOCTYPE html>  <html lang="en">    <head>    
-<meta charset="UTF-8">    
-<meta name="viewport" content="width=device-width, initial-scale=1.0">    
-<title>Valentine Proposal</title>  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">  <style>    *{
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine Proposal</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
 margin:0;
 padding:0;
 box-sizing:border-box;
@@ -14,7 +22,6 @@ justify-content:center;
 align-items:center;
 font-family:'Poppins',sans-serif;
 
-/* BACKGROUND IMAGE */
 background:
 linear-gradient(rgba(255,120,170,0.35),rgba(255,120,170,0.35)),
 url("wallpaper1.jpg") center/cover no-repeat fixed;
@@ -163,15 +170,64 @@ from{opacity:0;}
 to{opacity:1;}
 }
 
-</style>  </head>  <body>  <div class="page">  <div id="passwordDiv" class="box">  <h2>Enter Secret Code</h2>  <div class="input-container">  <input type="password" id="passInput">  <span class="toggle-eye" onclick="togglePassword(event)">  <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div id="passwordDiv" class="box">
+
+<h2>Enter Secret Code</h2>
+
+<div class="input-container">
+
+<input type="password" id="passInput">
+
+<span class="toggle-eye" onclick="togglePassword(event)">
+
+<svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
 <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
 <circle cx="12" cy="12" r="3"/>
-</svg>  <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none">
+</svg>
+
+<svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none">
 <path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.94 10.94 0 0112 20C5 20 1 12 1 12"/>
 <line x1="1" y1="1" x2="23" y2="23"/>
-</svg>  </span>  </div>  <button id="submitBtn" onclick="checkPassword()">Submit</button>
+</svg>
 
-</div>  <div id="hintSection" class="box">  <h3 id="hintHeader">Hint k liye kissiii do pehle huhh</h3>  <div class="input-container">  <input type="text" id="hintInput">  <button id="hintBtn" onclick="displayHint()">Give</button>  </div>  <div id="hintText"></div>  <div id="hintBox"></div>  </div>  </div>  <script>    setInterval(()=>{
+</span>
+
+</div>
+
+<button id="submitBtn" onclick="checkPassword()">Submit</button>
+
+</div>
+
+<div id="hintSection" class="box">
+
+<h3 id="hintHeader">Hint k liye kissiii do pehle huhh</h3>
+
+<div class="input-container">
+
+<input type="text" id="hintInput">
+
+<button id="hintBtn" onclick="displayHint()">Give</button>
+
+</div>
+
+<div id="hintText"></div>
+
+<div id="hintBox"></div>
+
+</div>
+
+</div>
+
+<script>
+
+setInterval(()=>{
 
 if(document.querySelectorAll(".heart").length>30) return;
 
@@ -215,33 +271,132 @@ const thirdLines=[
 "MAI HAAR MAANTA HOON 😭😭💋🛐😭😭😭"
 ];
 
-/* 🔥 PRELOAD SYSTEM */
-let i=1;
-const maxCheck=15;
+function togglePassword(event){
+event.preventDefault();
 
-function preload(){
-if(i>maxCheck) return;
+const open=document.getElementById("eyeOpen");
+const closed=document.getElementById("eyeClosed");
 
-let v=document.createElement("video");
-v.src=`edit${i}.mp4`;
-v.preload="auto";
-v.muted=true;
-v.style.display="none";
-
-v.onloadeddata=()=>{
-document.body.appendChild(v);
-i++;
-preload();
-};
-
-v.onerror=()=>{
-i++;
-preload();
-};
+if(passInput.type==="password"){
+passInput.type="text";
+open.style.display="block";
+closed.style.display="none";
+}
+else{
+passInput.type="password";
+open.style.display="none";
+closed.style.display="block";
 }
 
-preload();
+passInput.blur();
+}
 
-</script>  </body>
+passInput.addEventListener("input",()=>{
+submitBtn.classList.toggle("active",passInput.value.trim()!=="");
+});
 
+hintInput.addEventListener("input",()=>{
+hintBtn.classList.toggle("active",hintInput.value.trim()!=="");
+});
+
+passInput.addEventListener("keypress",e=>{
+if(e.key==="Enter") checkPassword();
+});
+
+hintInput.addEventListener("keypress",e=>{
+if(e.key==="Enter") displayHint();
+});
+
+function checkPassword(){
+
+if(passInput.value.trim()==="") return;
+
+if(passInput.value===password){
+window.location.href="yesorno.html";
+return;
+}
+
+wrongAttempts++;
+
+document.getElementById('hintSection').style.display='block';
+
+hintInput.value="";
+hintText.style.display='none';
+hintBox.style.display='none';
+
+if(wrongAttempts===1)
+hintHeader.textContent="Hint k liye kissiii do pehle huhh";
+else if(wrongAttempts===2)
+hintHeader.textContent="Ab 2nd hint ke liye kam se kam 30+ kisses chahiye huhh 🥺🥺😈";
+else
+hintHeader.textContent="Firse galat..ab nhi milegi koi hint vint huhh ";
+
+passInput.value="";
+submitBtn.classList.remove("active");
+}
+
+function displayHint(){
+
+if(wrongAttempts===0) return;
+
+const kissCount=(hintInput.value.match(/💋/g)||[]).length;
+
+if(wrongAttempts===1 && kissCount>=1){
+hintText.style.display='block';
+hintBox.style.display='block';
+
+hintText.textContent="Kya mujhe hint deni chahiye...uhmm...sochne do btau ya nhi 🤔...chalo bta hi deta hu huhhh";
+hintBox.textContent="First nickname";
+}
+else if(wrongAttempts===2 && kissCount>=30){
+hintText.style.display='block';
+hintBox.style.display='block';
+
+hintText.textContent="Kya mujhe hint deni chahiye...uhmm...sochne do btau ya nhi 🤔...chalo bta hi deta hu huhhh";
+hintBox.textContent="Password capital letters me hai huhh";
+}
+else if(wrongAttempts>=3 && kissCount>=1 && thirdStep<thirdLines.length){
+
+hintText.style.display='none';
+
+hintBox.style.display='block';
+hintBox.classList.add("fade-in");
+
+const letter=password[thirdStep];
+
+hintBox.innerHTML=thirdLines[thirdStep] +
+"<div class='revealed-letter'>Letter: "+letter+"</div>";
+
+thirdStep++;
+
+if(thirdStep===password.length){
+hintBox.innerHTML=thirdLines[thirdStep-1] +
+"<div class='revealed-letter'>NEETWALIMADAM</div>";
+}
+}
+
+hintInput.value="";
+}
+
+</script>
+
+<!-- 🔥 PRELOAD (SAFE) -->
+<script>
+(function(){
+let i=1, max=15;
+function load(){
+if(i>max) return;
+let v=new Video();
+v.src="edit"+i+".mp4";
+v.preload="auto";
+v.muted=true;
+v.load();
+v.onloadeddata=()=>{i++;load();};
+v.onerror=()=>{i++;load();};
+}
+load();
+})();
+</script>
+
+</body>
 </html>
