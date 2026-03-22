@@ -12,32 +12,34 @@
 body{
 background:black;
 overflow:hidden;
+touch-action:none; /* 🔥 IMPORTANT */
 }
-
-/* container */
 
 .container{
 height:100vh;
 width:100%;
-display:flex;
-justify-content:center;
-align-items:center;
-background:black;
 position:relative;
+overflow:hidden;
 }
 
-/* 🔥 NO ZOOM FIX */
-
+/* FIXED VIDEO DISPLAY */
 video{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
 max-width:100%;
 max-height:100%;
 object-fit:contain;
 background:black;
-position:absolute;
 }
 
-/* buttons */
+/* animation */
+.slide-up{ transform:translate(-50%,-150%); transition:0.4s; }
+.slide-center{ transform:translate(-50%,-50%); transition:0.4s; }
+.slide-down{ transform:translate(-50%,50%); transition:0.4s; }
 
+/* buttons */
 .nav-buttons{
 position:fixed;
 bottom:20px;
@@ -73,118 +75,123 @@ color:white;
 const container = document.getElementById("container");
 
 let videos = [];
-let current = 0;
+let index = 0;
 
-/* 🔥 AUTO DETECT VIDEOS */
-
-let i = 1;
-
+/* 🔥 AUTO DETECT */
+let i=1;
 function detect(){
+let v=document.createElement("video");
+v.src=`edit${i}.mp4`;
 
-let v = document.createElement("video");
-v.src = `edit${i}.mp4`;
-
-v.onloadeddata = ()=>{
+v.onloadeddata=()=>{
 videos.push(`edit${i}.mp4`);
 i++;
 detect();
 };
 
-v.onerror = ()=>{
-start();
-};
-
+v.onerror=()=>start();
 }
-
 detect();
 
+/* 🔥 CREATE VIDEO */
+function createVideo(src){
+let v=document.createElement("video");
+v.src=src;
+v.loop=true;
+v.playsInline=true;
+v.setAttribute("webkit-playsinline","true");
+v.preload="auto";
+v.muted=false;
+return v;
+}
+
 /* START */
+let currentVideo;
 
 function start(){
 
-if(videos.length === 0){
-container.innerHTML = "<p style='color:white'>No videos found</p>";
+if(videos.length===0){
+container.innerHTML="<p style='color:white'>No videos</p>";
 return;
 }
 
-current = Math.floor(Math.random() * videos.length);
+/* random */
+index=Math.floor(Math.random()*videos.length);
 
-loadVideos();
+currentVideo=createVideo(videos[index]);
+currentVideo.className="slide-center";
 
-}
-
-/* 🔥 CORE SYSTEM */
-
-let currentVideo, nextVideo;
-
-function loadVideos(){
-
-container.innerHTML = "";
-
-/* CURRENT */
-currentVideo = document.createElement("video");
-currentVideo.src = videos[current];
-currentVideo.autoplay = true;
-currentVideo.loop = true;
-currentVideo.playsInline = true;
-
-/* NEXT PRELOAD */
-if(current < videos.length - 1){
-nextVideo = document.createElement("video");
-nextVideo.src = videos[current + 1];
-nextVideo.preload = "auto";
-nextVideo.muted = true;
-}
-
-/* SHOW CURRENT */
 container.appendChild(currentVideo);
 
-currentVideo.onloadeddata = ()=>{
+/* FORCE PLAY FIX */
+setTimeout(()=>{
 currentVideo.play().catch(()=>{});
-};
+},100);
 
 }
 
-/* SWIPE */
+/* 🔥 SWIPE FIX (IMPORTANT) */
+let startY=0;
 
-let startY = 0;
+document.addEventListener("touchstart",e=>{
+startY=e.touches[0].clientY;
+},{passive:true});
 
-document.addEventListener("touchstart", e=>{
-startY = e.touches[0].clientY;
-});
+document.addEventListener("touchmove",e=>{
+e.preventDefault(); /* 🔥 FIX SCROLL ISSUE */
+},{passive:false});
 
-document.addEventListener("touchend", e=>{
+document.addEventListener("touchend",e=>{
 
-let diff = startY - e.changedTouches[0].clientY;
+let diff=startY-e.changedTouches[0].clientY;
 
 /* NEXT */
-if(diff > 50 && current < videos.length - 1){
+if(diff>70 && index<videos.length-1){
 
-current++;
-
-/* instant switch */
-container.innerHTML = "";
+let nextVideo=createVideo(videos[index+1]);
+nextVideo.className="slide-down";
 container.appendChild(nextVideo);
 
-currentVideo = nextVideo;
+setTimeout(()=>{
+currentVideo.className="slide-up";
+nextVideo.className="slide-center";
+},10);
 
-/* preload next-next */
-if(current < videos.length - 1){
-nextVideo = document.createElement("video");
-nextVideo.src = videos[current + 1];
-nextVideo.preload = "auto";
-nextVideo.muted = true;
-}
+setTimeout(()=>{
+currentVideo.pause();
+container.removeChild(currentVideo);
+
+currentVideo=nextVideo;
+index++;
 
 currentVideo.play().catch(()=>{});
 
+},400);
+
 }
 
-/* PREVIOUS */
-else if(diff < -50 && current > 0){
+/* PREV */
+else if(diff<-70 && index>0){
 
-current--;
-loadVideos();
+let prevVideo=createVideo(videos[index-1]);
+prevVideo.className="slide-up";
+container.appendChild(prevVideo);
+
+setTimeout(()=>{
+currentVideo.className="slide-down";
+prevVideo.className="slide-center";
+},10);
+
+setTimeout(()=>{
+currentVideo.pause();
+container.removeChild(currentVideo);
+
+currentVideo=prevVideo;
+index--;
+
+currentVideo.play().catch(()=>{});
+
+},400);
 
 }
 
