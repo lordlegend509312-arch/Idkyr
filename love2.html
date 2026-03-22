@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -30,14 +29,16 @@ width:100%;
 display:flex;
 justify-content:center;
 align-items:center;
-transition:transform 0.4s ease;
 }
 
 video{
 width:100%;
 height:100%;
-object-fit:cover;
+object-fit:contain; /* 🔥 no zoom */
+background:black;
 }
+
+/* buttons */
 
 .nav-buttons{
 position:fixed;
@@ -57,6 +58,19 @@ background:#ff4da6;
 color:white;
 }
 
+/* tap hint */
+
+.tap{
+position:absolute;
+color:white;
+bottom:50%;
+left:50%;
+transform:translate(-50%,50%);
+font-size:18px;
+opacity:0.8;
+z-index:20;
+}
+
 </style>
 </head>
 
@@ -64,67 +78,57 @@ color:white;
 
 <div class="container" id="container"></div>
 
+<div class="tap" id="tap">Tap for sound 🔊</div>
+
 <div class="nav-buttons">
-<button onclick="window.location.href='yesorno.html'">⬅ Previous</button>
-<button onclick="window.location.href='love2.html'">Next ➜</button>
+<button onclick="window.location.href='love.html'">⬅ Previous</button>
+<button onclick="window.location.href='love3.html'">Next ➜</button>
 </div>
 
 <script>
 
 const container = document.getElementById("container");
+const tapText = document.getElementById("tap");
 
 let reels = [];
 let videos = [];
 let current = 0;
+let soundEnabled = false;
 
-/* 🔥 MAIN LOGIC */
+/* 🔥 CREATE REELS */
 
 for(let i=1;i<=10;i++){
-
-let video = document.createElement("video");
-video.src = `edit${i}.mp4`;
-video.muted = true;
-video.loop = true;
-
-/* ✅ ONLY add when it CAN PLAY */
-
-video.addEventListener("canplay", ()=>{
-
-// prevent duplicate
-if(video.dataset.added) return;
-video.dataset.added = true;
 
 let div = document.createElement("div");
 div.className = "reel";
 
+let video = document.createElement("video");
+video.src = `edit${i}.mp4`;
+video.loop = true;
+video.playsInline = true;
+video.muted = true; // start muted
+
 div.appendChild(video);
 container.appendChild(div);
+}
 
 reels = document.querySelectorAll(".reel");
 videos = document.querySelectorAll("video");
 
-update();
-play();
+/* 🔥 RANDOM FIRST REEL */
 
-});
+current = Math.floor(Math.random() * reels.length);
 
-/* ❌ अगर error → ignore */
+/* POSITION */
 
-video.onerror = ()=>{
-// kuch nahi add hoga → no black screen
-};
-
-}
-
-/* position */
-
-function update(){
+function update(animate = true){
 reels.forEach((r,i)=>{
+r.style.transition = animate ? "transform 0.4s ease" : "none";
 r.style.transform = `translateY(${(i - current) * 100}%)`;
 });
 }
 
-/* play */
+/* PLAY */
 
 function play(){
 videos.forEach((v,i)=>{
@@ -136,7 +140,26 @@ v.pause();
 });
 }
 
-/* swipe */
+/* FIRST LOAD */
+update(false);
+play();
+
+/* 🔊 ENABLE SOUND ON TAP */
+
+document.addEventListener("click", ()=>{
+
+if(!soundEnabled){
+videos.forEach(v=>{
+v.muted = false;
+});
+soundEnabled = true;
+tapText.style.display = "none";
+play();
+}
+
+});
+
+/* SWIPE */
 
 let startY = 0;
 
@@ -155,7 +178,7 @@ else if(diff < -50 && current > 0){
 current--;
 }
 
-update();
+update(true);
 play();
 });
 
