@@ -2,376 +2,234 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reels ❤️</title>
+
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-  html, body {
-    background: #000;
-    overflow: hidden;
-    height: 100%;
-    width: 100%;
-  }
+html,body{
+  background:#000;
+  height:100%;
+  width:100%;
+  overflow:hidden;
+}
 
-  /* Two video slots — A and B, we alternate between them */
-  #slotA, #slotB {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-    z-index: 1;
-  }
+/* Slots */
+.slot{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#000;
+  opacity:0;
+  transition:opacity .25s ease;
+}
 
-  #slotA.visible, #slotB.visible {
-    opacity: 1;
-    z-index: 2;
-  }
+.slot.active{
+  opacity:1;
+  z-index:2;
+}
 
-  #slotA video, #slotB video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-    display: block;
-    pointer-events: none;
-  }
+video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000;
+}
 
-  /* Spinner */
-  #spinner {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 46px; height: 46px;
-    border: 3px solid rgba(255,255,255,0.15);
-    border-top-color: #ff4da6;
-    border-radius: 50%;
-    animation: spin 0.75s linear infinite;
-    z-index: 10;
-    display: none;
-  }
-  #spinner.show { display: block; }
-  @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+/* Spinner */
+#spinner{
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:45px;height:45px;
+  border:3px solid rgba(255,255,255,.2);
+  border-top-color:#ff4da6;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  display:none;
+  z-index:10;
+}
+#spinner.show{display:block;}
 
-  /* Tap to play */
-  #tapPlay {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255,77,166,0.92);
-    color: #fff;
-    padding: 13px 28px;
-    border-radius: 30px;
-    font-size: 15px;
-    z-index: 20;
-    display: none;
-    cursor: pointer;
-  }
-  #tapPlay.show { display: block; }
+@keyframes spin{
+  to{transform:translate(-50%,-50%) rotate(360deg);}
+}
 
-  /* Nav buttons */
-  #navBtns {
-    position: fixed;
-    bottom: 24px;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 22px;
-    z-index: 20;
-  }
-  #navBtns button {
-    padding: 11px 22px;
-    border: none;
-    border-radius: 22px;
-    background: #ff4da6;
-    color: #fff;
-    font-size: 14px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 4px 18px rgba(255,77,166,0.35);
-  }
-  #navBtns button:active { opacity: 0.7; }
+/* Tap */
+#tap{
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:#ff4da6;
+  color:#fff;
+  padding:12px 26px;
+  border-radius:25px;
+  display:none;
+  z-index:20;
+}
 
-  /* Swipe hint — text only, no emoji */
-  #swipeHint {
-    position: fixed;
-    bottom: 90px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    z-index: 30;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-  }
-
-  #swipeHint.hide { opacity: 0; }
-
-  .hint-arrow {
-    width: 2px;
-    background: rgba(255, 77, 166, 0.9);
-    border-radius: 2px;
-    animation: arrowPulse 1.4s ease-in-out infinite;
-  }
-  .hint-arrow:nth-child(1) { height: 30px; animation-delay: 0s;    opacity: 0.3; }
-  .hint-arrow:nth-child(2) { height: 22px; animation-delay: 0.15s; opacity: 0.6; }
-  .hint-arrow:nth-child(3) { height: 14px; animation-delay: 0.3s;  opacity: 1;   }
-
-  .hint-label {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 13px;
-    font-family: sans-serif;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-    animation: arrowPulse 1.4s ease-in-out infinite;
-  }
-
-  @keyframes arrowPulse {
-    0%   { transform: translateY(6px);  opacity: 0.4; }
-    50%  { transform: translateY(-4px); opacity: 1;   }
-    100% { transform: translateY(6px);  opacity: 0.4; }
-  }
+/* Hint */
+#hint{
+  position:fixed;
+  bottom:90px;
+  width:100%;
+  text-align:center;
+  color:#fff;
+  font-size:13px;
+  opacity:.8;
+  animation:updown 1.2s infinite;
+}
+@keyframes updown{
+  0%{transform:translateY(6px)}
+  50%{transform:translateY(-4px)}
+  100%{transform:translateY(6px)}
+}
+.hide{opacity:0;transition:.4s;}
 </style>
 </head>
+
 <body>
 
-<!-- Two slots for seamless crossfade, no flash -->
-<div id="slotA"><video id="vidA" loop playsinline></video></div>
-<div id="slotB"><video id="vidB" loop playsinline></video></div>
+<div id="slot1" class="slot active"><video id="v1" playsinline loop muted></video></div>
+<div id="slot2" class="slot"><video id="v2" playsinline loop muted></video></div>
 
 <div id="spinner"></div>
-<div id="tapPlay">▶ Tap to Play</div>
-
-<!-- Swipe hint: text only -->
-<div id="swipeHint">
-  <div class="hint-arrow"></div>
-  <div class="hint-arrow"></div>
-  <div class="hint-arrow"></div>
-  <div class="hint-label">Swipe up</div>
-</div>
-
-<div id="navBtns">
-  <button onclick="window.location.href='love.html'">⬅ Previous</button>
-  <button onclick="window.location.href='love3.html'">Next ➜</button>
-</div>
+<div id="tap">Tap to Play</div>
+<div id="hint">Swipe Up</div>
 
 <script>
-  const spinner   = document.getElementById("spinner");
-  const tapPlay   = document.getElementById("tapPlay");
-  const swipeHint = document.getElementById("swipeHint");
+const v1 = document.getElementById("v1");
+const v2 = document.getElementById("v2");
+const slot1 = document.getElementById("slot1");
+const slot2 = document.getElementById("slot2");
 
-  const slotA = document.getElementById("slotA");
-  const slotB = document.getElementById("slotB");
-  const vidA  = document.getElementById("vidA");
-  const vidB  = document.getElementById("vidB");
+const spinner = document.getElementById("spinner");
+const tap = document.getElementById("tap");
+const hint = document.getElementById("hint");
 
-  // Active slot tracking
-  let activeSlot = "A"; // "A" or "B"
-  let getActive  = () => activeSlot === "A" ? { slot: slotA, vid: vidA, other: slotB, otherVid: vidB } : { slot: slotB, vid: vidB, other: slotA, otherVid: vidA };
+let videos = [];
+let index = 0;
+let active = 1;
+let locked = false;
 
-  let videos   = [];
-  let current  = 0;
-  let isBusy   = false;
-  let hintDone = false;
+/* Detect videos */
+function detect(i){
+  const test = document.createElement("video");
+  test.src = `edit${i}.mp4`;
+  test.onloadedmetadata = ()=>{
+    videos.push(`edit${i}.mp4`);
+    detect(i+1);
+  };
+  test.onerror = start;
+}
+detect(1);
 
-  /* ── Hide hint ── */
-  function hideHint() {
-    if (hintDone) return;
-    hintDone = true;
-    swipeHint.classList.add("hide");
-    setTimeout(() => swipeHint.style.display = "none", 500);
+/* Load */
+function load(i){
+  if(i<0 || i>=videos.length || locked) return;
+  locked = true;
+
+  hint.classList.add("hide");
+
+  const nextV = active===1 ? v2 : v1;
+  const currV = active===1 ? v1 : v2;
+  const nextSlot = active===1 ? slot2 : slot1;
+  const currSlot = active===1 ? slot1 : slot2;
+
+  spinner.classList.add("show");
+
+  nextV.src = videos[i];
+  nextV.load();
+
+  nextV.oncanplaythrough = ()=>{
+    spinner.classList.remove("show");
+
+    nextV.play().catch(()=>{
+      tap.style.display="block";
+    });
+
+    nextSlot.classList.add("active");
+    currSlot.classList.remove("active");
+
+    setTimeout(()=>{
+      currV.pause();
+      currV.removeAttribute("src");
+      currV.load();
+    },300);
+
+    active = active===1?2:1;
+    index = i;
+    locked = false;
+
+    preload();
+  };
+}
+
+/* Preload */
+let pre = null;
+function preload(){
+  if(pre){
+    pre.remove();
+    pre = null;
+  }
+  if(index+1 < videos.length){
+    pre = document.createElement("video");
+    pre.src = videos[index+1];
+    pre.preload = "auto";
+  }
+}
+
+/* Start */
+function start(){
+  if(!videos.length){
+    document.body.innerHTML="<p style='color:white'>No videos</p>";
+    return;
   }
 
-  /* ══════════════════════
-     DETECT VIDEOS
-  ══════════════════════ */
-  function detectVideos(index, done) {
-    const probe = document.createElement("video");
-    probe.preload = "metadata";
-    probe.src = `edit${index}.mp4`;
-    probe.onloadedmetadata = () => {
-      probe.src = "";
-      videos.push(`edit${index}.mp4`);
-      detectVideos(index + 1, done);
-    };
-    probe.onerror = () => { probe.src = ""; done(); };
+  spinner.classList.add("show");
+
+  v1.src = videos[0];
+  v1.oncanplaythrough = ()=>{
+    spinner.classList.remove("show");
+    v1.play().catch(()=> tap.style.display="block");
+    preload();
+  };
+}
+
+/* Tap */
+tap.onclick = ()=>{
+  const v = active===1 ? v1 : v2;
+  v.muted = false;
+  v.play();
+  tap.style.display="none";
+};
+
+/* Swipe */
+let startY=0;
+
+document.addEventListener("touchstart",e=>{
+  startY = e.touches[0].clientY;
+});
+
+document.addEventListener("touchend",e=>{
+  if(locked) return;
+
+  let endY = e.changedTouches[0].clientY;
+  let diff = startY - endY;
+
+  if(Math.abs(diff) < 50) return;
+
+  if(diff>0){
+    load(index+1);
+  }else{
+    load(index-1);
   }
-
-  /* ══════════════════════
-     LOAD VIDEO — no flash
-     Uses two slots (A/B),
-     new video loads hidden,
-     then crossfades in
-  ══════════════════════ */
-  function loadVideo(index) {
-    if (index < 0 || index >= videos.length || isBusy) return;
-
-    isBusy = true;
-    tapPlay.classList.remove("show");
-
-    const next = activeSlot === "A"
-      ? { slot: slotB, vid: vidB, prevSlot: slotA, prevVid: vidA }
-      : { slot: slotA, vid: vidA, prevSlot: slotB, prevVid: vidB };
-
-    // Load new video into hidden slot
-    next.vid.src        = videos[index];
-    next.vid.muted      = false;
-    next.vid.loop       = true;
-    next.vid.playsInline = true;
-    next.slot.style.opacity = "0";
-    next.slot.style.zIndex  = "1";
-
-    spinner.classList.add("show");
-
-    let unlockTimer = setTimeout(() => {
-      spinner.classList.remove("show");
-      isBusy = false;
-    }, 5000);
-
-    const onReady = () => {
-      clearTimeout(unlockTimer);
-      spinner.classList.remove("show");
-
-      // Play new video
-      next.vid.play().catch(() => tapPlay.classList.add("show"));
-
-      // Crossfade: show new, hide old
-      next.slot.classList.add("visible");
-      next.slot.style.zIndex = "2";
-      next.prevSlot.classList.remove("visible");
-      next.prevSlot.style.zIndex = "1";
-
-      // Stop & clear old video after fade
-      setTimeout(() => {
-        next.prevVid.pause();
-        next.prevVid.src = "";
-        next.prevVid.load();
-      }, 300);
-
-      activeSlot = activeSlot === "A" ? "B" : "A";
-      current    = index;
-      isBusy     = false;
-
-      schedulePreload();
-    };
-
-    if (next.vid.readyState >= 3) {
-      onReady();
-    } else {
-      next.vid.oncanplay = () => { next.vid.oncanplay = null; onReady(); };
-    }
-  }
-
-  /* ══════════════════════
-     PRELOAD
-  ══════════════════════ */
-  let preNext = null, prePrev = null;
-
-  function schedulePreload() {
-    if (current + 1 < videos.length) {
-      if (!preNext || preNext._idx !== current + 1) {
-        if (preNext) { preNext.src = ""; preNext.load(); }
-        preNext = document.createElement("video");
-        preNext.src = videos[current + 1];
-        preNext.preload = "auto";
-        preNext.muted = true;
-        preNext.playsInline = true;
-        preNext._idx = current + 1;
-      }
-    }
-    if (current - 1 >= 0) {
-      if (!prePrev || prePrev._idx !== current - 1) {
-        if (prePrev) { prePrev.src = ""; prePrev.load(); }
-        prePrev = document.createElement("video");
-        prePrev.src = videos[current - 1];
-        prePrev.preload = "auto";
-        prePrev.muted = true;
-        prePrev.playsInline = true;
-        prePrev._idx = current - 1;
-      }
-    }
-  }
-
-  /* ══════════════════════
-     TAP TO PLAY
-  ══════════════════════ */
-  tapPlay.addEventListener("click", () => {
-    const { vid } = getActive();
-    vid.play().catch(() => {});
-    tapPlay.classList.remove("show");
-  });
-
-  /* ══════════════════════
-     SWIPE
-  ══════════════════════ */
-  let startX = 0, startY = 0, swiped = false;
-
-  document.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    swiped = false;
-  }, { passive: false });
-
-  document.addEventListener("touchmove", e => {
-    if (swiped) { e.preventDefault(); return; }
-    if (isBusy) return;
-
-    const diffX = Math.abs(e.touches[0].clientX - startX);
-    const diffY = startY - e.touches[0].clientY;
-
-    if (Math.abs(diffY) > 40 && diffX < 40) {
-      e.preventDefault();
-      swiped = true;
-      hideHint();
-
-      if (diffY > 0 && current < videos.length - 1) {
-        loadVideo(current + 1);
-      } else if (diffY < 0 && current > 0) {
-        loadVideo(current - 1);
-      } else {
-        isBusy = false;
-      }
-    }
-  }, { passive: false });
-
-  document.addEventListener("touchend", () => { swiped = false; }, { passive: true });
-
-  /* ══════════════════════
-     START
-  ══════════════════════ */
-  detectVideos(1, () => {
-    if (videos.length === 0) {
-      document.body.innerHTML = "<p style='color:white;padding:30px;font-size:16px'>Koi video nahi mili</p>";
-      return;
-    }
-
-    // Load first video in slot A
-    vidA.src         = videos[0];
-    vidA.muted       = false;
-    vidA.loop        = true;
-    vidA.playsInline = true;
-    vidA.preload     = "auto";
-    slotA.classList.add("visible");
-
-    spinner.classList.add("show");
-
-    let t = setTimeout(() => { spinner.classList.remove("show"); isBusy = false; }, 5000);
-
-    vidA.oncanplay = () => {
-      vidA.oncanplay = null;
-      clearTimeout(t);
-      spinner.classList.remove("show");
-      vidA.play().catch(() => tapPlay.classList.add("show"));
-      schedulePreload();
-    };
-  });
+});
 </script>
+
 </body>
 </html>
