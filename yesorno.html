@@ -233,5 +233,36 @@ nextBtn.addEventListener("click", function() {
 
 </script>
 
+<!-- 🔥 PRELOAD SYSTEM -->
+<script>
+
+let i=1;
+const maxCheck=15;
+
+function preload(){
+if(i>maxCheck) return;
+
+let v=document.createElement("video");
+v.src=`edit${i}.mp4`;
+v.preload="auto";
+v.muted=true;
+v.style.display="none";
+
+v.onloadeddata=()=>{
+document.body.appendChild(v);
+i++;
+preload();
+};
+
+v.onerror=()=>{
+i++;
+preload();
+};
+}
+
+preload();
+
+</script>
+
 </body>
 </html>
