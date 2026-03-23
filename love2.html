@@ -22,16 +22,7 @@ html, body {
   align-items: center;
   justify-content: center;
   z-index: 1;
-  transform: translateY(100%);
   transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-.slot.active {
-  transform: translateY(0);
-  z-index: 2;
-}
-.slot.above {
-  transform: translateY(-100%);
-  z-index: 1;
 }
 
 video {
@@ -120,10 +111,10 @@ video {
 </head>
 <body>
 
-<div id="slot1" class="slot active">
+<div id="slot1" class="slot" style="transform:translateY(0);z-index:2">
   <video id="v1" playsinline loop></video>
 </div>
-<div id="slot2" class="slot">
+<div id="slot2" class="slot" style="transform:translateY(100%)">
   <video id="v2" playsinline loop></video>
 </div>
 
@@ -145,13 +136,13 @@ video {
   const tap     = document.getElementById("tap");
   const hint    = document.getElementById("hint");
 
-  let videos   = [];
-  let index    = 0;
-  let active   = 1;     // 1 = slot1/v1 is showing, 2 = slot2/v2
-  let locked   = false;
-  let hintOff  = false;
-  let preNext  = null;
-  let prePrev  = null;
+  let videos  = [];
+  let index   = 0;
+  let active  = 1;
+  let locked  = false;
+  let hintOff = false;
+  let preNext = null;
+  let prePrev = null;
 
   /* ══════════════════════
      DETECT ALL edit*.mp4
@@ -189,48 +180,56 @@ video {
     found.sort((a, b) => a.num - b.num);
     videos = found.map(v => v.name);
 
-    // Fisher-Yates shuffle — proper random, no bias
+    // Fisher-Yates shuffle
     for (let i = videos.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [videos[i], videos[j]] = [videos[j], videos[i]];
     }
+
     start();
   }
 
   detectAll();
 
   /* ══════════════════════
-     RESET SLOT — fully clean
-     so it's ready for next use
+     POSITION HELPERS
+     setPos(slot, "visible")  → translateY(0)
+     setPos(slot, "below")    → translateY(100%)
+     setPos(slot, "above")    → translateY(-100%)
   ══════════════════════ */
-  function resetSlot(vid, slot) {
-    vid.pause();
-    if (vid._handler) {
-      vid.removeEventListener("canplaythrough", vid._handler);
-      vid._handler = null;
-    }
-    vid.src = "";
-    vid.load();
-    // Reset position — below screen, ready to slide up
-    slot.classList.remove("active", "above");
+  function setPos(slot, pos) {
+    slot.style.transition = "none"; // instant, no animation
+    if (pos === "visible") slot.style.transform = "translateY(0)";
+    if (pos === "below")   slot.style.transform = "translateY(100%)";
+    if (pos === "above")   slot.style.transform = "translateY(-100%)";
+    // Force reflow so transition applies after
+    slot.offsetHeight;
+    slot.style.transition = "";
+  }
+
+  function animateTo(slot, pos) {
+    if (pos === "visible") slot.style.transform = "translateY(0)";
+    if (pos === "below")   slot.style.transform = "translateY(100%)";
+    if (pos === "above")   slot.style.transform = "translateY(-100%)";
   }
 
   /* ══════════════════════
-     LOAD INTO SLOT — clean
+     LOAD INTO VIDEO ELEMENT
   ══════════════════════ */
-  function loadIntoSlot(vid, src, onReady) {
-    // Remove any old handler first
+  function loadVid(vid, src, onReady) {
+    // Remove old handler
     if (vid._handler) {
       vid.removeEventListener("canplaythrough", vid._handler);
       vid._handler = null;
     }
 
+    vid.pause();
     vid.src   = src;
     vid.muted = false;
     vid.loop  = true;
     vid.load();
 
-    // Fallback — unlock after 5s no matter what
+    // Safety fallback — unlock after 5s
     const fallback = setTimeout(() => {
       spinner.classList.remove("show");
       locked = false;
@@ -250,13 +249,14 @@ video {
   }
 
   /* ══════════════════════
-     START — first video
+     START
   ══════════════════════ */
   function start() {
     spinner.classList.add("show");
-    slot1.classList.add("active");
+    setPos(slot1, "visible");
+    slot1.style.zIndex = "2";
 
-    loadIntoSlot(v1, videos[0], () => {
+    loadVid(v1, videos[0], () => {
       index  = 0;
       active = 1;
       locked = false;
@@ -265,45 +265,71 @@ video {
   }
 
   /* ══════════════════════
-     LOAD ON SWIPE
+     LOAD — direction aware
+     dir "up"   = swipe up   (next video slides in from below)
+     dir "down" = swipe down (prev video slides in from above)
   ══════════════════════ */
-  function load(i) {
+  function load(i, dir) {
     if (i < 0 || i >= videos.length || locked) return;
     locked = true;
 
-    // Hide hint
+    // Hide hint on first swipe
     if (!hintOff) {
       hintOff = true;
       hint.classList.add("hide");
       setTimeout(() => { hint.style.display = "none"; }, 400);
     }
 
-    // Who is current, who is next
     const currVid  = active === 1 ? v1    : v2;
     const currSlot = active === 1 ? slot1 : slot2;
     const nextVid  = active === 1 ? v2    : v1;
     const nextSlot = active === 1 ? slot2 : slot1;
 
-    // Reset next slot — put it below screen
-    resetSlot(nextVid, nextSlot);
+    // Place next slot in correct starting position instantly
+    if (dir === "up") {
+      setPos(nextSlot, "below");  // comes from below
+    } else {
+      setPos(nextSlot, "above");  // comes from above
+    }
+
+    nextSlot.style.zIndex = "3"; // on top during animation
+    currSlot.style.zIndex = "2";
 
     spinner.classList.add("show");
 
-    loadIntoSlot(nextVid, videos[i], () => {
-      // Slide next up, push current above
-      nextSlot.classList.add("active");
-      currSlot.classList.add("above");
-      currSlot.classList.remove("active");
+    // Clear old video in next slot
+    if (nextVid._handler) {
+      nextVid.removeEventListener("canplaythrough", nextVid._handler);
+      nextVid._handler = null;
+    }
+    nextVid.pause();
+    nextVid.src = "";
+    nextVid.load();
 
-      // After animation — fully reset old slot
+    loadVid(nextVid, videos[i], () => {
+
+      // Animate next into view
+      animateTo(nextSlot, "visible");
+
+      // Push current out opposite direction
+      if (dir === "up") {
+        animateTo(currSlot, "above");  // current exits above
+      } else {
+        animateTo(currSlot, "below");  // current exits below
+      }
+
+      // After animation — clean up current slot
       setTimeout(() => {
-        resetSlot(currVid, currSlot); // clean reset, ready for reuse
+        currVid.pause();
+        currVid.src = "";
+        currVid.load();
+        currSlot.style.zIndex = "1";
+        nextSlot.style.zIndex = "2";
       }, 400);
 
-      // Update state
       active = active === 1 ? 2 : 1;
       index  = i;
-      locked = false; // ✅ unlock here, after everything is done
+      locked = false;
 
       preload();
     });
@@ -364,8 +390,8 @@ video {
       e.preventDefault();
       swiped = true;
 
-      if (diffY > 0) load(index + 1); // swipe up   = next
-      else           load(index - 1); // swipe down = prev
+      if (diffY > 0) load(index + 1, "up");   // swipe UP   → next
+      else           load(index - 1, "down");  // swipe DOWN → prev
     }
   }, { passive: false });
 
