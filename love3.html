@@ -29,16 +29,22 @@ body {
   overflow-y: auto;
   position: relative;
 
-  /* Rich animated romantic background */
-  background:
-    radial-gradient(ellipse at 0% 0%,   rgba(255,100,180,0.5)  0%, transparent 55%),
-    radial-gradient(ellipse at 100% 0%,  rgba(255,0,100,0.4)    0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%,  rgba(255,150,200,0.3)  0%, transparent 60%),
-    radial-gradient(ellipse at 0% 100%,  rgba(200,0,80,0.4)     0%, transparent 50%),
-    radial-gradient(ellipse at 100% 100%,rgba(255,50,130,0.5)   0%, transparent 55%),
-    linear-gradient(145deg, #ff85c0, #ff3d9a, #c2006b, #ff6db5, #ff1a80);
-  background-size: cover;
-  background-attachment: fixed;
+  background: linear-gradient(135deg, #ff9ac6, #ffb3d9, #ff6fa5);
+}
+
+/* ── Full page wallpaper ── */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: url("wallpaper3.jpg") center/cover no-repeat;
+}
+
+.bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 20, 100, 0.45);
 }
 
 /* ── Content wrapper ── */
@@ -248,6 +254,8 @@ audio {
 </style>
 </head>
 <body>
+
+<div class="bg"></div>
 
 <div class="wrapper">
 
