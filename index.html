@@ -275,7 +275,7 @@ button:hover{
 
   /* ── FIX #6 — password hashed, not plain text ── */
   // SHA-256 of "NEETWALIMADAM"
-  const correctHash = "e44e0638e2eb983da17c5a9c16e6c2df3e50bdb4ddf62ad59e3adfb6ff9bad91";
+  const correctHash = "d4e9b8ff3111a27ebd1f6aaa13aae9ad3fb693ba37b754d161bcf46a3c604edd";
 
   async function hashInput(str) {
     const buf  = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
