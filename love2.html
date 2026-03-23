@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Reels ❤️</title>
-
 <style>
 *{ margin:0; padding:0; box-sizing:border-box; }
 
@@ -15,6 +14,7 @@ html, body {
   overflow: hidden;
 }
 
+/* ── SLOTS ── */
 .slot {
   position: fixed;
   top: 0; left: 0;
@@ -22,13 +22,17 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
   z-index: 1;
-  transition: opacity 0.25s ease;
+  transform: translateY(100%); /* below by default */
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
 }
 .slot.active {
-  opacity: 1;
+  transform: translateY(0);    /* visible */
   z-index: 2;
+}
+.slot.above {
+  transform: translateY(-100%); /* above, already passed */
+  z-index: 1;
 }
 
 video {
@@ -36,8 +40,10 @@ video {
   height: 100%;
   object-fit: contain;
   pointer-events: none;
+  background: #000;
 }
 
+/* ── SPINNER ── */
 #spinner {
   position: fixed;
   top: 50%; left: 50%;
@@ -55,6 +61,7 @@ video {
   to { transform: translate(-50%,-50%) rotate(360deg); }
 }
 
+/* ── TAP TO PLAY ── */
 #tap {
   position: fixed;
   top: 50%; left: 50%;
@@ -69,6 +76,7 @@ video {
   font-size: 15px;
 }
 
+/* ── NAV ── */
 #nav {
   position: fixed;
   bottom: 20px;
@@ -91,6 +99,7 @@ video {
 }
 #nav button:active { opacity: 0.7; }
 
+/* ── SWIPE HINT ── */
 #hint {
   position: fixed;
   bottom: 85px;
@@ -148,39 +157,14 @@ video {
   let hintOff = false;
   let preEl   = null;
 
-  /* ══════════════════════════════════════
-     DETECT — tries 1 to 50, skips missing
-     edit1, edit4, edit8 — all found ✅
-  ══════════════════════════════════════ */
-  let detectCount = 0;
-  let maxCheck    = 50; // checks edit1.mp4 to edit50.mp4
-
-  function detect() {
-    let checked = 0;
-
-    for (let i = 1; i <= maxCheck; i++) {
-      const t = document.createElement("video");
-      t.preload = "metadata";
-      t.src = `edit${i}.mp4`;
-
-      t.onloadedmetadata = () => {
-        t.src = "";
-        videos.push(`edit${i}.mp4`);
-        checked++;
-        if (checked + countErrors === maxCheck) done();
-      };
-
-      t.onerror = () => {
-        t.src = "";
-        checked++;
-        if (checked + countErrors === maxCheck) done();
-      };
-    }
-  }
-
-  // Simpler clean approach — parallel fetch all 1-50
-  let resolved = 0;
+  /* ══════════════════════
+     DETECT ALL edit*.mp4
+     Parallel 1-50, skip gaps
+  ══════════════════════ */
   function detectAll() {
+    let resolved = 0;
+    const found  = [];
+
     for (let i = 1; i <= 50; i++) {
       (function(num) {
         const t = document.createElement("video");
@@ -189,67 +173,86 @@ video {
 
         t.onloadedmetadata = () => {
           t.src = "";
-          videos.push({ name: `edit${num}.mp4`, num: num });
+          found.push({ name: `edit${num}.mp4`, num });
           resolved++;
-          if (resolved === 50) finish();
+          if (resolved === 50) finish(found);
         };
 
         t.onerror = () => {
           t.src = "";
           resolved++;
-          if (resolved === 50) finish();
+          if (resolved === 50) finish(found);
         };
       })(i);
     }
   }
 
-  function finish() {
-    // Sort first, then shuffle for random order every time
-    videos.sort((a, b) => a.num - b.num);
-    videos = videos.map(v => v.name);
-    videos.sort(() => Math.random() - 0.5);
-
-    if (!videos.length) {
+  function finish(found) {
+    if (!found.length) {
       document.body.innerHTML = "<p style='color:white;padding:30px'>No videos found</p>";
       return;
     }
-
+    // Sort then shuffle for random order every time
+    found.sort((a, b) => a.num - b.num);
+    videos = found.map(v => v.name);
+    videos.sort(() => Math.random() - 0.5);
     start();
   }
 
   detectAll();
 
   /* ══════════════════════
-     START
+     START — first video
   ══════════════════════ */
   function start() {
     spinner.classList.add("show");
+    playInSlot(v1, slot1, videos[0], () => {
+      preload();
+    });
+  }
 
-    v1.src   = videos[0];
-    v1.muted = false;
-    v1.load();
+  /* ══════════════════════
+     PLAY IN SLOT — clean helper
+     No repeated events, no loop bugs
+  ══════════════════════ */
+  function playInSlot(vid, slot, src, onReady) {
+    // Fully reset video first
+    vid.pause();
+    vid.removeEventListener("canplaythrough", vid._handler);
+    vid.src   = "";
+    vid.load();
+
+    vid.src   = src;
+    vid.muted = false;
+    vid.loop  = true;
+    vid.load();
 
     const fallback = setTimeout(() => {
       spinner.classList.remove("show");
       locked = false;
+      onReady && onReady();
     }, 5000);
 
-    v1.oncanplaythrough = () => {
-      v1.oncanplaythrough = null;
+    // FIX — store handler ref so we can remove it, no repeats
+    vid._handler = () => {
+      vid.removeEventListener("canplaythrough", vid._handler);
       clearTimeout(fallback);
       spinner.classList.remove("show");
-      v1.play().catch(() => { tap.style.display = "block"; });
-      preload();
+      vid.play().catch(() => { tap.style.display = "block"; });
+      onReady && onReady();
     };
+
+    vid.addEventListener("canplaythrough", vid._handler);
   }
 
   /* ══════════════════════
-     LOAD VIDEO
+     LOAD VIDEO ON SWIPE
   ══════════════════════ */
   function load(i) {
     if (i < 0 || i >= videos.length || locked) return;
     locked = true;
 
+    // Hide hint
     if (!hintOff) {
       hintOff = true;
       hint.classList.add("hide");
@@ -261,39 +264,31 @@ video {
     const nextSlot = active === 1 ? slot2 : slot1;
     const currSlot = active === 1 ? slot1 : slot2;
 
+    // Position next slot below (ready to slide up)
+    nextSlot.classList.remove("active", "above");
+
     spinner.classList.add("show");
 
-    nextV.src   = videos[i];
-    nextV.muted = false;
-    nextV.load();
-
-    const fallback = setTimeout(() => {
-      spinner.classList.remove("show");
-      locked = false;
-    }, 5000);
-
-    nextV.oncanplaythrough = () => {
-      nextV.oncanplaythrough = null;
-      clearTimeout(fallback);
-      spinner.classList.remove("show");
-
-      nextV.play().catch(() => { tap.style.display = "block"; });
-
+    playInSlot(nextV, nextSlot, videos[i], () => {
+      // Slide animation — next comes up, current goes above
       nextSlot.classList.add("active");
+      currSlot.classList.add("above");
       currSlot.classList.remove("active");
 
+      // Stop old video after animation
       setTimeout(() => {
         currV.pause();
         currV.src = "";
         currV.load();
-      }, 300);
+        currSlot.classList.remove("above");
+      }, 400);
 
       active = active === 1 ? 2 : 1;
       index  = i;
       locked = false;
 
       preload();
-    };
+    });
   }
 
   /* ══════════════════════
@@ -301,7 +296,6 @@ video {
   ══════════════════════ */
   function preload() {
     if (preEl) { preEl.src = ""; preEl.load(); preEl = null; }
-
     if (index + 1 < videos.length) {
       preEl             = document.createElement("video");
       preEl.src         = videos[index + 1];
@@ -338,12 +332,12 @@ video {
     const diffX = Math.abs(e.touches[0].clientX - startX);
     const diffY = startY - e.touches[0].clientY;
 
-    if (Math.abs(diffY) > 55 && diffX < 35) {
+    if (Math.abs(diffY) > 50 && diffX < 35) {
       e.preventDefault();
       swiped = true;
 
-      if (diffY > 0) load(index + 1);
-      else           load(index - 1);
+      if (diffY > 0) load(index + 1); // swipe up = next
+      else           load(index - 1); // swipe down = prev
     }
   }, { passive: false });
 
