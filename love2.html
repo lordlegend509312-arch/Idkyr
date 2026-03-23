@@ -2,244 +2,331 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Reels ❤️</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+*{ margin:0; padding:0; box-sizing:border-box; }
 
-html,body{
-  background:#000;
-  height:100%;
-  width:100%;
-  overflow:hidden;
+html, body {
+  background: #000;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
-/* Slots */
-.slot{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  opacity:0;
-  transition:opacity .25s ease;
+/* Two slots — A and B */
+.slot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  z-index: 1;
+  transition: opacity 0.25s ease;
 }
-.slot.active{
-  opacity:1;
-  z-index:2;
+.slot.active {
+  opacity: 1;
+  z-index: 2;
 }
 
-video{
-  width:100%;
-  height:100%;
-  object-fit:contain;
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 /* Spinner */
-#spinner{
-  position:fixed;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:45px;height:45px;
-  border:3px solid rgba(255,255,255,.2);
-  border-top-color:#ff4da6;
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-  display:none;
-  z-index:10;
+#spinner {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 45px; height: 45px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: #ff4da6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: none;
+  z-index: 10;
 }
-#spinner.show{display:block;}
-
-@keyframes spin{
-  to{transform:translate(-50%,-50%) rotate(360deg);}
-}
-
-/* Tap */
-#tap{
-  position:fixed;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  background:#ff4da6;
-  color:#fff;
-  padding:12px 26px;
-  border-radius:25px;
-  display:none;
-  z-index:20;
+#spinner.show { display: block; }
+@keyframes spin {
+  to { transform: translate(-50%,-50%) rotate(360deg); }
 }
 
-/* Buttons */
-#nav{
-  position:fixed;
-  bottom:20px;
-  width:100%;
-  display:flex;
-  justify-content:space-between;
-  padding:0 20px;
-  z-index:20;
-}
-#nav button{
-  padding:10px 20px;
-  border:none;
-  border-radius:20px;
-  background:#ff4da6;
-  color:#fff;
+/* Tap to play */
+#tap {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ff4da6;
+  color: #fff;
+  padding: 12px 26px;
+  border-radius: 25px;
+  display: none;
+  z-index: 20;
+  cursor: pointer;
+  font-size: 15px;
 }
 
-/* Hint */
-#hint{
-  position:fixed;
-  bottom:80px;
-  width:100%;
-  text-align:center;
-  color:#fff;
-  font-size:13px;
-  opacity:.8;
+/* Nav buttons — page navigation only */
+#nav {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 20;
 }
-.hide{opacity:0;transition:.4s;}
+#nav button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background: #ff4da6;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 16px rgba(255,77,166,0.35);
+}
+#nav button:active { opacity: 0.7; }
+
+/* Swipe hint */
+#hint {
+  position: fixed;
+  bottom: 85px;
+  width: 100%;
+  text-align: center;
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  font-family: sans-serif;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  z-index: 20;
+  pointer-events: none;
+  animation: hintPulse 1.4s ease-in-out infinite;
+  transition: opacity 0.4s ease;
+}
+#hint.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes hintPulse {
+  0%   { transform: translateY(4px);  opacity: 0.5; }
+  50%  { transform: translateY(-4px); opacity: 1;   }
+  100% { transform: translateY(4px);  opacity: 0.5; }
+}
 </style>
 </head>
-
 <body>
 
-<div id="slot1" class="slot active"><video id="v1" playsinline loop muted></video></div>
-<div id="slot2" class="slot"><video id="v2" playsinline loop muted></video></div>
+<!-- Slot A -->
+<div id="slot1" class="slot active">
+  <video id="v1" playsinline loop></video>
+</div>
+
+<!-- Slot B -->
+<div id="slot2" class="slot">
+  <video id="v2" playsinline loop></video>
+</div>
 
 <div id="spinner"></div>
 <div id="tap">Tap to Play</div>
 <div id="hint">Swipe Up</div>
 
 <div id="nav">
-  <button id="prev">⬅ Previous</button>
-  <button id="next">Next ➜</button>
+  <!-- Buttons only navigate pages, NOT videos -->
+  <button onclick="window.location.href='love.html'">⬅ Previous</button>
+  <button onclick="window.location.href='love3.html'">Next ➜</button>
 </div>
 
 <script>
-const v1 = document.getElementById("v1");
-const v2 = document.getElementById("v2");
-const slot1 = document.getElementById("slot1");
-const slot2 = document.getElementById("slot2");
+  const v1      = document.getElementById("v1");
+  const v2      = document.getElementById("v2");
+  const slot1   = document.getElementById("slot1");
+  const slot2   = document.getElementById("slot2");
+  const spinner = document.getElementById("spinner");
+  const tap     = document.getElementById("tap");
+  const hint    = document.getElementById("hint");
 
-const spinner = document.getElementById("spinner");
-const tap = document.getElementById("tap");
-const hint = document.getElementById("hint");
+  let videos  = [];
+  let index   = 0;
+  let active  = 1;     // which slot is showing: 1 or 2
+  let locked  = false; // swipe lock
+  let hintOff = false; // hint shown once only
+  let preEl   = null;  // preload element
 
-const prevBtn = document.getElementById("prev");
-const nextBtn = document.getElementById("next");
+  /* ══════════════════════
+     DETECT VIDEOS
+  ══════════════════════ */
+  function detect(i) {
+    const t = document.createElement("video");
+    t.preload = "metadata";
+    t.src = `edit${i}.mp4`;
 
-let videos = [];
-let index = 0;
-let active = 1;
-let locked = false;
+    t.onloadedmetadata = () => {
+      t.src = ""; // FIX #4 — free memory
+      videos.push(`edit${i}.mp4`);
+      detect(i + 1);
+    };
 
-/* Detect */
-function detect(i){
-  const t = document.createElement("video");
-  t.src = `edit${i}.mp4`;
-  t.onloadedmetadata = ()=>{ videos.push(`edit${i}.mp4`); detect(i+1); };
-  t.onerror = start;
-}
-detect(1);
+    t.onerror = () => {
+      t.src = "";
+      start();
+    };
+  }
 
-/* Load */
-function load(i){
-  if(i<0 || i>=videos.length || locked) return;
-  locked = true;
+  detect(1);
 
-  hint.classList.add("hide");
+  /* ══════════════════════
+     START — load first video
+  ══════════════════════ */
+  function start() {
+    if (!videos.length) {
+      document.body.innerHTML = "<p style='color:white;padding:30px'>No videos found</p>";
+      return;
+    }
 
-  const nextV = active===1 ? v2 : v1;
-  const currV = active===1 ? v1 : v2;
-  const nextSlot = active===1 ? slot2 : slot1;
-  const currSlot = active===1 ? slot1 : slot2;
+    spinner.classList.add("show");
 
-  spinner.classList.add("show");
+    v1.src   = videos[0];
+    v1.muted = false; // FIX #1 — unmuted from start
+    v1.load();
 
-  nextV.src = videos[i];
-  nextV.load();
+    // FIX #5 — timeout fallback so page never freezes
+    const fallback = setTimeout(() => {
+      spinner.classList.remove("show");
+      locked = false;
+    }, 5000);
 
-  nextV.oncanplaythrough = ()=>{
-    spinner.classList.remove("show");
+    v1.oncanplaythrough = () => {
+      v1.oncanplaythrough = null;
+      clearTimeout(fallback);
+      spinner.classList.remove("show");
+      v1.play().catch(() => { tap.style.display = "block"; });
+      preload();
+    };
+  }
 
-    nextV.play().catch(()=> tap.style.display="block");
+  /* ══════════════════════
+     LOAD VIDEO (swipe)
+  ══════════════════════ */
+  function load(i) {
+    if (i < 0 || i >= videos.length || locked) return;
+    locked = true;
 
-    nextSlot.classList.add("active");
-    currSlot.classList.remove("active");
+    // Hide hint on first swipe — FIX #7
+    if (!hintOff) {
+      hintOff = true;
+      hint.classList.add("hide");
+      setTimeout(() => { hint.style.display = "none"; }, 400);
+    }
 
-    setTimeout(()=>{
-      currV.pause();
-      currV.removeAttribute("src");
-      currV.load();
-    },300);
+    const nextV    = active === 1 ? v2    : v1;
+    const currV    = active === 1 ? v1    : v2;
+    const nextSlot = active === 1 ? slot2 : slot1;
+    const currSlot = active === 1 ? slot1 : slot2;
 
-    active = active===1?2:1;
-    index = i;
-    locked = false;
+    spinner.classList.add("show");
 
-    preload();
+    nextV.src   = videos[i];
+    nextV.muted = false; // FIX #1 — always unmuted
+    nextV.load();
+
+    // FIX #5 — fallback unlock if canplaythrough never fires
+    const fallback = setTimeout(() => {
+      spinner.classList.remove("show");
+      locked = false;
+    }, 5000);
+
+    nextV.oncanplaythrough = () => {
+      nextV.oncanplaythrough = null;
+      clearTimeout(fallback);
+      spinner.classList.remove("show");
+
+      nextV.play().catch(() => { tap.style.display = "block"; });
+
+      // Crossfade slots
+      nextSlot.classList.add("active");
+      currSlot.classList.remove("active");
+
+      // Stop and clear old video after fade
+      setTimeout(() => {
+        currV.pause();
+        currV.src = "";
+        currV.load();
+      }, 300);
+
+      active = active === 1 ? 2 : 1;
+      index  = i;
+      locked = false;
+
+      preload();
+    };
+  }
+
+  /* ══════════════════════
+     PRELOAD NEXT VIDEO ONLY
+  ══════════════════════ */
+  function preload() {
+    if (preEl) { preEl.src = ""; preEl.load(); preEl = null; }
+
+    if (index + 1 < videos.length) {
+      preEl          = document.createElement("video");
+      preEl.src      = videos[index + 1];
+      preEl.preload  = "auto";
+      preEl.muted    = true;
+      preEl.playsInline = true;
+    }
+  }
+
+  /* ══════════════════════
+     TAP TO PLAY
+  ══════════════════════ */
+  tap.onclick = () => {
+    const v = active === 1 ? v1 : v2;
+    v.muted = false;
+    v.play().catch(() => {});
+    tap.style.display = "none";
   };
-}
 
-/* Preload */
-let pre=null;
-function preload(){
-  if(pre){ pre.remove(); pre=null; }
-  if(index+1 < videos.length){
-    pre = document.createElement("video");
-    pre.src = videos[index+1];
-    pre.preload="auto";
-  }
-}
+  /* ══════════════════════
+     SWIPE — all fixes applied
+  ══════════════════════ */
+  let startX  = 0;
+  let startY  = 0;
+  let swiped  = false; // FIX #3 — one swipe per gesture
 
-/* Start */
-function start(){
-  if(!videos.length){
-    document.body.innerHTML="<p style='color:white'>No videos</p>";
-    return;
-  }
+  document.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    swiped = false;
+  }, { passive: true });
 
-  spinner.classList.add("show");
+  document.addEventListener("touchmove", e => {
+    if (locked || swiped) return;
 
-  v1.src = videos[0];
-  v1.oncanplaythrough = ()=>{
-    spinner.classList.remove("show");
-    v1.play().catch(()=> tap.style.display="block");
-    preload();
-  };
-}
+    const diffX = Math.abs(e.touches[0].clientX - startX);
+    const diffY = startY - e.touches[0].clientY;
 
-/* Tap */
-tap.onclick = ()=>{
-  const v = active===1 ? v1 : v2;
-  v.muted=false;
-  v.play();
-  tap.style.display="none";
-};
+    // FIX #2 — only vertical swipe, prevent page scroll
+    if (Math.abs(diffY) > 55 && diffX < 35) {
+      e.preventDefault(); // FIX #2
+      swiped = true;      // FIX #3
 
-/* Swipe (FIXED) */
-let startY=0;
+      if (diffY > 0) load(index + 1); // swipe up = next
+      else           load(index - 1); // swipe down = prev
+    }
+  }, { passive: false }); // FIX #2 — must be false for preventDefault
 
-document.addEventListener("touchstart",e=>{
-  startY = e.touches[0].clientY;
-});
-
-document.addEventListener("touchmove",e=>{
-  if(locked) return;
-
-  let diff = startY - e.touches[0].clientY;
-
-  if(Math.abs(diff) > 60){
-    if(diff>0) load(index+1);
-    else load(index-1);
-  }
-});
-
-/* Buttons */
-nextBtn.onclick = ()=> load(index+1);
-prevBtn.onclick = ()=> load(index-1);
+  document.addEventListener("touchend", () => {
+    swiped = false;
+  }, { passive: true });
 
 </script>
-
 </body>
 </html>
