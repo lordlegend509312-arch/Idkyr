@@ -204,9 +204,10 @@ video {
   }
 
   function finish() {
-    // Sort by number so edit1, edit4, edit8 play in correct order
+    // Sort first, then shuffle for random order every time
     videos.sort((a, b) => a.num - b.num);
     videos = videos.map(v => v.name);
+    videos.sort(() => Math.random() - 0.5);
 
     if (!videos.length) {
       document.body.innerHTML = "<p style='color:white;padding:30px'>No videos found</p>";
