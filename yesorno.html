@@ -10,129 +10,134 @@
 <style>
 
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    font-family: 'Dancing Script', cursive;
-    text-align: center;
-    user-select: none;
-    background: linear-gradient(-45deg, #ff9acb, #ffcce6, #ff66b2, #ffb3d9);
-    background-size: 400% 400%;
-    animation: gradientBG 10s ease infinite;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Dancing Script', cursive;
+  text-align: center;
+  user-select: none;
+  background: linear-gradient(-45deg, #ff9acb, #ffcce6, #ff66b2, #ffb3d9);
+  background-size: 400% 400%;
+  animation: gradientBG 10s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 @keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .container {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(20px);
-    padding: 30px;
-    border-radius: 30px;
-    box-shadow: 0 20px 50px rgba(255,0,102,0.4);
-    animation: fadeIn 1.5s ease;
-    transition: 0.4s;
-    position: relative;
-    z-index: 2;
-    width: auto;
-    max-width: 90%;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  padding: 30px;
+  border-radius: 30px;
+  box-shadow: 0 20px 50px rgba(255,0,102,0.4);
+  animation: fadeIn 1.5s ease;
+  transition: 0.4s;
+  position: relative;
+  z-index: 2;
+  width: auto;
+  max-width: 90%;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 img {
-    display: block;
-    margin: 0 auto;
-    width: auto;
-    height: auto;
-    max-width: 100%;
+  display: block;
+  margin: 0 auto;
+  width: auto;
+  height: auto;
+  max-width: 100%;
 }
 
 h1 {
-    font-family: 'Great Vibes', cursive;
-    font-size: 40px;
-    color: #ff0066;
-    text-shadow: 0 0 15px rgba(255,0,128,0.4);
-    margin: 20px 0 0 0;
+  font-family: 'Great Vibes', cursive;
+  font-size: 40px;
+  color: #ff0066;
+  text-shadow: 0 0 15px rgba(255,0,128,0.4);
+  margin: 20px 0 0 0;
 }
 
 .buttons { margin-top: 20px; }
 
 .next-wrapper {
-    display: none;
-    margin-top: 25px;
-    text-align: right;
+  display: none;
+  margin-top: 25px;
+  text-align: right;
 }
 
 button {
-    padding: 15px 25px;
-    font-size: 20px;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    margin: 10px;
-    transition: 0.3s;
+  padding: 15px 25px;
+  font-size: 20px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  margin: 10px;
+  transition: 0.3s;
 }
 
 #yesBtn {
-    background: linear-gradient(45deg, #ff4da6, #ff0066);
-    color: white;
+  background: linear-gradient(45deg, #ff4da6, #ff0066);
+  color: white;
 }
 #yesBtn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px #ff1a75;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px #ff1a75;
 }
 
 #noBtn {
-    background: linear-gradient(45deg, #ff9999, #ff4d4d);
-    color: white;
+  background: linear-gradient(45deg, #ff9999, #ff4d4d);
+  color: white;
 }
 
 #nextBtn {
-    padding: 10px 22px;
-    border: none;
-    border-radius: 20px;
-    background: #ff0066;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(255,0,102,0.6);
+  padding: 10px 22px;
+  border: none;
+  border-radius: 20px;
+  background: #ff0066;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(255,0,102,0.6);
 }
 
+/* Stars */
 .star {
-    position: fixed;
-    width: 6px;
-    height: 6px;
-    background: white;
-    border-radius: 50%;
-    animation: twinkle 2s infinite alternate;
-    z-index: 0;
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 2s infinite alternate;
+  z-index: 0;
+  pointer-events: none;
 }
 
 @keyframes twinkle {
-    from { opacity: 0.3; transform: scale(0.5); }
-    to { opacity: 1; transform: scale(1.6); }
+  from { opacity: 0.3; transform: scale(0.5); }
+  to   { opacity: 1;   transform: scale(1.6); }
 }
 
+/* Hearts */
 .heart {
-    position: fixed;
-    font-size: 18px;
-    animation: floatUp 6s linear forwards;
+  position: fixed;
+  font-size: 18px;
+  animation: floatUp 6s linear forwards;
+  pointer-events: none;
+  z-index: 0;
 }
 
 @keyframes floatUp {
-    from { transform: translateY(0); opacity: 1; }
-    to { transform: translateY(-110vh); opacity: 0; }
+  from { transform: translateY(0);      opacity: 1; }
+  to   { transform: translateY(-110vh); opacity: 0; }
 }
 
 </style>
@@ -141,128 +146,176 @@ button {
 <body>
 
 <div class="container">
+  <img id="bearImg" src="main.gif">
+  <h1 id="mainText">Will you be my valentine? 💖</h1>
 
-<img id="bearImg" src="main.gif">
+  <div class="buttons">
+    <button id="yesBtn">Yes</button>
+    <button id="noBtn">No</button>
+  </div>
 
-<h1 id="mainText">Will you be my valentine? 💖</h1>
-
-<div class="buttons">
-<button id="yesBtn">Yes</button>
-<button id="noBtn">No</button>
-</div>
-
-<div class="next-wrapper" id="nextWrapper">
-<button id="nextBtn">Next ➜</button>
-</div>
-
+  <div class="next-wrapper" id="nextWrapper">
+    <button id="nextBtn">Next ➜</button>
+  </div>
 </div>
 
 <script>
 
-setInterval(() => {
-    const star = document.createElement("div");
-    star.className = "star";
-    star.style.left = Math.random() * window.innerWidth + "px";
-    star.style.top = Math.random() * window.innerHeight + "px";
+  /* ── Stars — FIX #4: limit max stars ── */
+  setInterval(() => {
+    if (document.querySelectorAll(".star").length > 20) return;
+    const star       = document.createElement("div");
+    star.className   = "star";
+    star.style.left  = Math.random() * window.innerWidth + "px";
+    star.style.top   = Math.random() * window.innerHeight + "px";
     document.body.appendChild(star);
     setTimeout(() => star.remove(), 2000);
-}, 300);
+  }, 300);
 
-setInterval(() => {
-    const heart = document.createElement("div");
+  /* ── Hearts — FIX #7: use bottom with fixed position correctly ── */
+  setInterval(() => {
+    if (document.querySelectorAll(".heart").length > 15) return;
+    const heart     = document.createElement("div");
     heart.className = "heart";
     heart.innerHTML = "💖";
-    heart.style.left = Math.random() * window.innerWidth + "px";
-    heart.style.bottom = "-20px";
+    heart.style.left   = Math.random() * window.innerWidth + "px";
+    heart.style.bottom = "0px";
+    heart.style.top    = "auto";
     document.body.appendChild(heart);
     setTimeout(() => heart.remove(), 6000);
-}, 1500);
+  }, 1500);
 
-const yesBtn = document.getElementById("yesBtn");
-const noBtn = document.getElementById("noBtn");
-const nextBtn = document.getElementById("nextBtn");
-const nextWrapper = document.getElementById("nextWrapper");
-const mainText = document.getElementById("mainText");
+  const yesBtn     = document.getElementById("yesBtn");
+  const noBtn      = document.getElementById("noBtn");
+  const nextBtn    = document.getElementById("nextBtn");
+  const nextWrapper = document.getElementById("nextWrapper");
+  const mainText   = document.getElementById("mainText");
 
-let yesSize = 20;
-let noScale = 1;
-let noIndex = 0;
+  let yesSize = 20;
+  let noScale = 1;
+  let noIndex = 0;
 
-let noTexts = [
-"Please 🥺","Oh","Hm","Okay ☺️","Sweetuuu pleaseeee ☹️","Please please please 😥",
-"Meri cutuuu maanjao 😚","Dil tut rhaa hai..🥺☹️🥺","Prettyyy pleaseee..","Brown rasmalai plss 😡",
-"Neet wali madam\nkya hai huhh","Meri jaan 😚","Shonuu babyy maanjao na 🥳","Okay ab bohot hora h",
-"Marr jauga","Marr gya"
-];
+  const noTexts = [
+    "Please 🥺","Oh","Hm","Okay ☺️","Sweetuuu pleaseeee ☹️","Please please please 😥",
+    "Meri cutuuu maanjao 😚","Dil tut rhaa hai..🥺☹️🥺","Prettyyy pleaseee..","Brown rasmalai plss 😡",
+    "Neet wali madam\nkya hai huhh","Meri jaan 😚","Shonuu babyy maanjao na 🥳","Okay ab bohot hora h",
+    "Marr jauga","Marr gya"
+  ];
 
-noBtn.addEventListener("click", function() {
+  /* ── No button — FIX #6: hide at 0.25 so it can't be accidentally clicked ── */
+  noBtn.addEventListener("click", function() {
     if (noIndex < noTexts.length - 1) noIndex++;
     this.innerText = noTexts[noIndex];
+
     yesSize += 12;
     yesBtn.style.fontSize = yesSize + "px";
-    yesBtn.style.padding = (yesSize/2) + "px " + yesSize + "px";
-    if(noScale > 0.25) {
-        noScale -= 0.08;
-        noBtn.style.transform = "scale(" + noScale + ")";
-    }
-});
+    yesBtn.style.padding  = (yesSize / 2) + "px " + yesSize + "px";
 
-yesBtn.addEventListener("click", function() {
+    if (noScale > 0.25) {
+      noScale -= 0.08;
+      noBtn.style.transform = "scale(" + noScale + ")";
+    } else {
+      // FIX #6 — fully hide when too small to prevent ghost clicks
+      noBtn.style.visibility  = "hidden";
+      noBtn.style.pointerEvents = "none";
+    }
+  });
+
+  /* ── Yes button ── */
+  yesBtn.addEventListener("click", function() {
     mainText.innerText = "Happiiii happiiiiiii happpiiiiiiiiiii 🥳🥳🥳🥳😋🙈🙈🙈💋💋💋💓❤️🧡💛💚💙💜🤎💋❤️‍🩹♥️💌💕💘💝💖😍🤩🥰😘😚";
     document.getElementById("bearImg").src = "main2.gif";
     document.querySelector(".buttons").style.display = "none";
     nextWrapper.style.display = "block";
 
-    document.documentElement.style.overflow = "auto"; 
-    document.body.style.overflow = "auto";
+    // FIX #5 — removed unnecessary overflow auto
 
-    for(let i=0;i<25;i++){
-        const heart = document.createElement("div");
-        heart.className = "heart";
-        heart.innerHTML = "💖";
-        heart.style.left = Math.random() * window.innerWidth + "px";
-        heart.style.bottom = "0px";
-        document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 4000);
+    // Burst hearts on yes
+    for (let i = 0; i < 25; i++) {
+      const heart     = document.createElement("div");
+      heart.className = "heart";
+      heart.innerHTML = "💖";
+      heart.style.left   = Math.random() * window.innerWidth + "px";
+      heart.style.bottom = "0px";
+      heart.style.top    = "auto";
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 4000);
     }
-});
+  });
 
-nextBtn.addEventListener("click", function() {
+  /* ── Next button ── */
+  nextBtn.addEventListener("click", function() {
     window.location.href = "love.html";
-});
+  });
+
+  /* ══════════════════════════════════════════
+     SMART PRELOAD — same as love.html
+     FIX #1 #2 #3 — parallel, no DOM append, 1-100
+  ══════════════════════════════════════════ */
+  (function(){
+
+    // 1. Videos — edit1 to edit100, parallel, no DOM append
+    for (let i = 1; i <= 100; i++) {
+      (function(num){
+        const v   = document.createElement("video");
+        v.preload = "auto";
+        v.muted   = true;
+        v.src     = "edit" + num + ".mp4";
+        v.onerror = () => { v.src = ""; };
+        // NOT appended to DOM — no memory leak
+      })(i);
+    }
+
+    // 2. Wallpapers — wallpaper1 to wallpaper30, all extensions
+    const imgExts = ["jpg","jpeg","png","webp"];
+    for (let i = 1; i <= 30; i++) {
+      imgExts.forEach(ext => {
+        const img = new Image();
+        img.src   = "wallpaper" + i + "." + ext;
+      });
+    }
+    imgExts.forEach(ext => {
+      const img = new Image();
+      img.src   = "wallpaper." + ext;
+    });
+
+    // 3. MP3 files — common patterns, no DOM append
+    const audioPatterns = ["song","bg","music","audio","track","ost","bgm"];
+    audioPatterns.forEach(name => {
+      for (let i = 1; i <= 20; i++) {
+        const a   = document.createElement("audio");
+        a.preload = "auto";
+        a.src     = name + i + ".mp3";
+        a.onerror = () => { a.src = ""; };
+      }
+      const a   = document.createElement("audio");
+      a.preload = "auto";
+      a.src     = name + ".mp3";
+      a.onerror = () => { a.src = ""; };
+    });
+
+    // 4. Pages — love1 to love20 auto detect + yesorno.html
+    for (let i = 1; i <= 20; i++) {
+      (function(num){
+        fetch("love" + num + ".html", { method: "HEAD" })
+          .then(res => {
+            if (res.ok) {
+              const link = document.createElement("link");
+              link.rel   = "prefetch";
+              link.href  = "love" + num + ".html";
+              document.head.appendChild(link);
+            }
+          })
+          .catch(() => {});
+      })(i);
+    }
+    const yn = document.createElement("link");
+    yn.rel   = "prefetch";
+    yn.href  = "yesorno.html";
+    document.head.appendChild(yn);
+
+  })();
 
 </script>
-
-<!-- 🔥 PRELOAD SYSTEM -->
-<script>
-
-let i=1;
-const maxCheck=15;
-
-function preload(){
-if(i>maxCheck) return;
-
-let v=document.createElement("video");
-v.src=`edit${i}.mp4`;
-v.preload="auto";
-v.muted=true;
-v.style.display="none";
-
-v.onloadeddata=()=>{
-document.body.appendChild(v);
-i++;
-preload();
-};
-
-v.onerror=()=>{
-i++;
-preload();
-};
-}
-
-preload();
-
-</script>
-
 </body>
 </html>
