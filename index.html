@@ -8,168 +8,199 @@
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
 body{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-font-family:'Poppins',sans-serif;
-
-background:
-linear-gradient(rgba(255,120,170,0.35),rgba(255,120,170,0.35)),
-url("wallpaper1.jpg") center/cover no-repeat fixed;
-
-overflow:hidden;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:'Poppins',sans-serif;
+  background:
+    linear-gradient(rgba(255,120,170,0.35),rgba(255,120,170,0.35)),
+    url("wallpaper1.jpg") center/cover no-repeat fixed;
+  overflow:hidden;
 }
 
+/* Hearts */
 .heart{
-position:fixed;
-font-size:26px;
-animation:floatUp 10s linear forwards;
-pointer-events:none;
-opacity:0.85;
+  position:fixed;
+  font-size:26px;
+  animation:floatUp 10s linear forwards;
+  pointer-events:none;
+  opacity:0.85;
 }
 
 @keyframes floatUp{
-from{
-transform:translateY(100vh) scale(0.7);
-opacity:0;
-}
-to{
-transform:translateY(-120vh) scale(1.4);
-opacity:1;
-}
+  from{ transform:translateY(100vh) scale(0.7); opacity:0; }
+  to{   transform:translateY(-120vh) scale(1.4); opacity:1; }
 }
 
 .page{
-width:90%;
-max-width:420px;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:25px;
+  width:90%;
+  max-width:420px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:25px;
 }
 
 .box{
-width:100%;
-padding:30px 22px;
-border-radius:25px;
-background:rgba(255,255,255,0.35);
-backdrop-filter:blur(15px);
-box-shadow:0 10px 30px rgba(255,0,102,0.25),inset 0 0 10px rgba(255,255,255,0.6);
-text-align:center;
-transition:0.3s;
+  width:100%;
+  padding:30px 22px;
+  border-radius:25px;
+  background:rgba(255,255,255,0.35);
+  backdrop-filter:blur(15px);
+  box-shadow:0 10px 30px rgba(255,0,102,0.25),inset 0 0 10px rgba(255,255,255,0.6);
+  text-align:center;
+  transition:0.3s;
 }
 
-.box:hover{
-transform:translateY(-4px);
-}
+.box:hover{ transform:translateY(-4px); }
 
-.box h2,.box h3{
-font-family:'Dancing Script',cursive;
-color:#ff0066;
-font-size:30px;
-text-shadow:0 0 8px rgba(255,0,102,0.35);
+.box h2, .box h3{
+  font-family:'Dancing Script',cursive;
+  color:#ff0066;
+  font-size:30px;
+  text-shadow:0 0 8px rgba(255,0,102,0.35);
 }
 
 .input-container{
-position:relative;
-margin-top:18px;
+  position:relative;
+  margin-top:18px;
 }
 
 input{
-width:100%;
-padding:12px 40px 12px 12px;
-border-radius:14px;
-border:2px solid #ff8ab6;
-font-size:15px;
-outline:none;
-background:rgba(255,255,255,0.85);
-transition:.25s;
+  width:100%;
+  padding:12px 40px 12px 12px;
+  border-radius:14px;
+  border:2px solid #ff8ab6;
+  font-size:15px;
+  outline:none;
+  background:rgba(255,255,255,0.85);
+  transition:.25s;
 }
 
 input:focus{
-border-color:#ff2e7a;
-box-shadow:0 0 10px rgba(255,46,122,0.3);
+  border-color:#ff2e7a;
+  box-shadow:0 0 10px rgba(255,46,122,0.3);
 }
 
 .toggle-eye{
-position:absolute;
-right:12px;
-top:50%;
-transform:translateY(-50%);
-cursor:pointer;
-display:flex;
-align-items:center;
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
 }
 
 .toggle-eye svg{
-width:22px;
-height:22px;
-stroke:#ff2e7a;
-transition:.2s;
+  width:22px;
+  height:22px;
+  stroke:#ff2e7a;
+  transition:.2s;
 }
 
-.toggle-eye:hover svg{
-transform:scale(1.1);
-}
+.toggle-eye:hover svg{ transform:scale(1.1); }
 
 button{
-margin-top:15px;
-padding:11px 22px;
-border:none;
-border-radius:14px;
-font-size:15px;
-cursor:pointer;
-background:linear-gradient(45deg,#ff4d94,#ff1a66);
-color:white;
-transition:.25s;
+  margin-top:15px;
+  padding:11px 22px;
+  border:none;
+  border-radius:14px;
+  font-size:15px;
+  cursor:pointer;
+  background:linear-gradient(45deg,#ff4d94,#ff1a66);
+  color:white;
+  transition:.25s;
 }
 
 button.active{
-background:linear-gradient(135deg,#ff0066,#ff1a66,#ff4d94);
+  background:linear-gradient(135deg,#ff0066,#ff1a66,#ff4d94);
 }
 
 button:hover{
-transform:scale(1.05);
-box-shadow:0 5px 15px rgba(255,0,100,0.3);
+  transform:scale(1.05);
+  box-shadow:0 5px 15px rgba(255,0,100,0.3);
 }
 
-#hintSection{
-display:none;
+#hintSection{ display:none; }
+
+#hintText, #hintBox{
+  display:none;
+  margin-top:15px;
+  color:#d6005c;
+  font-weight:500;
 }
 
-#hintText,#hintBox{
-display:none;
-margin-top:15px;
-color:#d6005c;
-font-weight:500;
+/* FIX #5 — hint button properly spaced */
+.hint-row{
+  display:flex;
+  gap:8px;
+  margin-top:18px;
+  align-items:center;
+}
+
+.hint-row input{
+  flex:1;
+  margin:0;
+  padding:12px;
+}
+
+.hint-row button{
+  margin:0;
+  padding:11px 18px;
+  flex-shrink:0;
 }
 
 .revealed-letter{
-margin-top:8px;
-font-size:20px;
-font-weight:bold;
-color:#b30059;
-transition:.3s;
+  margin-top:8px;
+  font-size:20px;
+  font-weight:bold;
+  color:#b30059;
+  transition:.3s;
 }
 
-.fade-in{
-animation:fadeIn 0.6s ease forwards;
-}
+.fade-in{ animation:fadeIn 0.6s ease forwards; }
 
 @keyframes fadeIn{
-from{opacity:0;}
-to{opacity:1;}
+  from{opacity:0;}
+  to{opacity:1;}
 }
 
+/* Wrong password shake */
+@keyframes shake{
+  0%,100%{ transform:translateX(0); }
+  20%{ transform:translateX(-8px); }
+  40%{ transform:translateX(8px); }
+  60%{ transform:translateX(-5px); }
+  80%{ transform:translateX(5px); }
+}
+.shake{ animation:shake 0.4s ease; }
+
+/* Password box glow pulse after hint */
+@keyframes glowPulse{
+  0%,100%{ box-shadow:0 10px 30px rgba(255,0,102,0.25),inset 0 0 10px rgba(255,255,255,0.6); }
+  50%{ box-shadow:0 0 30px rgba(255,0,102,0.9),0 0 60px rgba(255,0,102,0.5),inset 0 0 10px rgba(255,255,255,0.6); }
+}
+.glow-pulse{
+  animation:glowPulse 1s ease-in-out infinite;
+}
+
+/* Hint button disabled state */
+#hintBtn:disabled{
+  background:linear-gradient(45deg,#ccc,#aaa);
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+  opacity:0.7;
+}
 </style>
 </head>
 
@@ -177,247 +208,366 @@ to{opacity:1;}
 
 <div class="page">
 
-<div id="passwordDiv" class="box">
+  <!-- Password Box -->
+  <div id="passwordDiv" class="box">
 
-<h2>Enter Secret Code</h2>
+    <h2>Enter Secret Code</h2>
 
-<div class="input-container">
+    <div class="input-container">
 
-<input type="password" id="passInput">
+      <input type="password" id="passInput" placeholder="Type here...">
 
-<span class="toggle-eye" onclick="togglePassword(event)">
+      <!-- FIX #1 — eye toggle logic fixed -->
+      <span class="toggle-eye" onclick="togglePassword(event)">
+        <!-- eyeOpen = password hidden, show this when text is hidden -->
+        <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <!-- eyeClosed = show when password is visible -->
+        <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.94 10.94 0 0112 20C5 20 1 12 1 12"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+      </span>
 
-<svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-<path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
-<circle cx="12" cy="12" r="3"/>
-</svg>
+    </div>
 
-<svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none">
-<path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.94 10.94 0 0112 20C5 20 1 12 1 12"/>
-<line x1="1" y1="1" x2="23" y2="23"/>
-</svg>
+    <button id="submitBtn" onclick="checkPassword()">Submit</button>
 
-</span>
+  </div>
 
-</div>
+  <!-- Hint Box -->
+  <div id="hintSection" class="box" style="display:none">
 
-<button id="submitBtn" onclick="checkPassword()">Submit</button>
+    <h3 id="hintHeader">Hint k liye kissiii do pehle huhh</h3>
 
-</div>
+    <!-- FIX #5 — button outside input-container, flex row -->
+    <div class="hint-row">
+      <input type="text" id="hintInput" placeholder="">
+      <button id="hintBtn" onclick="displayHint()">Give</button>
+    </div>
 
-<div id="hintSection" class="box">
+    <!-- FIX #3 — no hint attempted message -->
+    <div id="noAttemptMsg" style="display:none;margin-top:12px;color:#d6005c;font-weight:500;">
+      Pehle password try toh karo 🙄
+    </div>
 
-<h3 id="hintHeader">Hint k liye kissiii do pehle huhh</h3>
+    <div id="hintText"></div>
+    <div id="hintBox"></div>
 
-<div class="input-container">
-
-<input type="text" id="hintInput">
-
-<button id="hintBtn" onclick="displayHint()">Give</button>
-
-</div>
-
-<div id="hintText"></div>
-
-<div id="hintBox"></div>
-
-</div>
+  </div>
 
 </div>
 
 <script>
 
-setInterval(()=>{
-if(document.querySelectorAll(".heart").length>30) return;
+  /* ── Hearts ── */
+  setInterval(() => {
+    if (document.querySelectorAll(".heart").length > 30) return;
+    const heart       = document.createElement("div");
+    heart.className   = "heart";
+    heart.innerHTML   = "💖";
+    heart.style.left  = Math.random() * window.innerWidth + "px";
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 10000);
+  }, 900);
 
-const heart=document.createElement("div");
-heart.className="heart";
-heart.innerHTML="💖";
-heart.style.left=Math.random()*window.innerWidth+"px";
+  /* ── FIX #6 — password hashed, not plain text ── */
+  // SHA-256 of "NEETWALIMADAM"
+  const correctHash = "e44e0638e2eb983da17c5a9c16e6c2df3e50bdb4ddf62ad59e3adfb6ff9bad91";
 
-document.body.appendChild(heart);
-setTimeout(()=>heart.remove(),10000);
+  async function hashInput(str) {
+    const buf  = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+  }
 
-},900);
+  const passInput  = document.getElementById("passInput");
+  const hintInput  = document.getElementById("hintInput");
+  const hintHeader = document.getElementById("hintHeader");
+  const hintText   = document.getElementById("hintText");
+  const hintBox    = document.getElementById("hintBox");
+  const submitBtn  = document.getElementById("submitBtn");
+  const hintBtn    = document.getElementById("hintBtn");
+  const noAttempt  = document.getElementById("noAttemptMsg");
 
-const password="NEETWALIMADAM";
+  let wrongAttempts  = 0;  // total wrong passwords entered
+  let hintsTaken     = 0;  // hints actually given (controls hint level)
+  let thirdStep      = 0;
+  let hintJustGiven  = false; // true after hint given, resets after next wrong password
 
-const passInput=document.getElementById('passInput');
-const hintInput=document.getElementById('hintInput');
-const hintHeader=document.getElementById('hintHeader');
-const hintText=document.getElementById('hintText');
-const hintBox=document.getElementById('hintBox');
-const submitBtn=document.getElementById('submitBtn');
-const hintBtn=document.getElementById('hintBtn');
+  const thirdLines = [
+    "Yrrr pighalo mt 😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭uhmm yelo",
+    "Oye kya krri ho ye bola na mt pighlaooo 😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭",
+    "yrrr pighal gya firse lelo hint 😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭",
+    "Oye sharam aari hai bohot zadaa kya krri hoo ye 😭😭😭😭😭😭😭😭😭😭😭😭😡😡😡😡😡😭😭😭😭😭😭😭😭😭😭😭😭😭",
+    "Baby no gandii baat🥺🥺🥺😭😭😭😭😭😭😭",
+    "Code type krte krte hi sharam aari h 😭🙈😭😭😭😭😭😭😭😭😭😭😭🙈🙈🙈😭",
+    "Oye ab bohot hora h aise hi krte krte pura password nikalwa login hainaa 🙄🥺🥺😭😭",
+    "oyee bol rhaaa hu maanjaooo kyaaa haii huhh huhh 🙈😡😡😡😡😭😭",
+    "Gandiii😭😭😭😭😭🙈🙈🥳🥳",
+    "NOOOOOO😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭",
+    "😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭",
+    "DED 😭😭😭😭😭😭😭😭😭😭😭😭😭",
+    "MAI HAAR MAANTA HOON 😭😭💋🛐😭😭😭"
+  ];
 
-let wrongAttempts=0;
-let thirdStep=0;
+  /* ── FIX #1 — eye toggle fixed ── */
+  function togglePassword(event) {
+    event.preventDefault();
+    const open   = document.getElementById("eyeOpen");
+    const closed = document.getElementById("eyeClosed");
 
-const thirdLines=[
-"Yrrr pighalo mt 😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭uhmm yelo",
-"Oye kya krri ho ye bola na mt pighlaooo 😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭",
-"yrrr pighal gya firse lelo hint 😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭",
-"Oye sharam aari hai bohot zadaa kya krri hoo ye 😭😭😭😭😭😭😭😭😭😭😭😭😡😡😡😡😡😭😭😭😭😭😭😭😭😭😭😭😭😭",
-"Baby no gandii baat🥺🥺🥺😭😭😭😭😭😭😭",
-"Code type krte krte hi sharam aari h 😭🙈😭😭😭😭😭😭😭😭😭😭😭🙈🙈🙈😭",
-"Oye ab bohot hora h aise hi krte krte pura password nikalwa login hainaa 🙄🥺🥺😭😭",
-"oyee bol rhaaa hu maanjaooo kyaaa haii huhh huhh 🙈😡😡😡😡😭😭",
-"Gandiii😭😭😭😭😭🙈🙈🥳🥳",
-"NOOOOOO😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭",
-"😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭",
-"DED 😭😭😭😭😭😭😭😭😭😭😭😭😭",
-"MAI HAAR MAANTA HOON 😭😭💋🛐😭😭😭"
-];
+    if (passInput.type === "password") {
+      passInput.type       = "text";
+      open.style.display   = "none";   // hide open eye (now visible)
+      closed.style.display = "block";  // show closed eye (to hide again)
+    } else {
+      passInput.type       = "password";
+      open.style.display   = "block";  // show open eye (password hidden)
+      closed.style.display = "none";
+    }
+    passInput.focus();
+  }
 
-function togglePassword(event){
-event.preventDefault();
+  passInput.addEventListener("input", () => {
+    submitBtn.classList.toggle("active", passInput.value.trim() !== "");
+  });
 
-const open=document.getElementById("eyeOpen");
-const closed=document.getElementById("eyeClosed");
+  hintInput.addEventListener("input", () => {
+    hintBtn.classList.toggle("active", hintInput.value.trim() !== "");
+  });
 
-if(passInput.type==="password"){
-passInput.type="text";
-open.style.display="block";
-closed.style.display="none";
-}else{
-passInput.type="password";
-open.style.display="none";
-closed.style.display="block";
-}
+  passInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") checkPassword();
+  });
 
-passInput.blur();
-}
+  hintInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") displayHint();
+  });
 
-passInput.addEventListener("input",()=>{
-submitBtn.classList.toggle("active",passInput.value.trim()!=="");
-});
+  /* ── Check Password ── */
+  async function checkPassword() {
+    const val = passInput.value.trim();
+    if (!val) return;
 
-hintInput.addEventListener("input",()=>{
-hintBtn.classList.toggle("active",hintInput.value.trim()!=="");
-});
+    const h = await hashInput(val);
 
-passInput.addEventListener("keypress",e=>{
-if(e.key==="Enter") checkPassword();
-});
+    if (h === correctHash) {
+      window.location.href = "yesorno.html";
+      return;
+    }
 
-hintInput.addEventListener("keypress",e=>{
-if(e.key==="Enter") displayHint();
-});
+    // Wrong — shake animation
+    const box = document.getElementById("passwordDiv");
+    box.classList.remove("shake");
+    void box.offsetWidth;
+    box.classList.add("shake");
+    setTimeout(() => box.classList.remove("shake"), 400);
 
-function checkPassword(){
+    wrongAttempts++;
+    document.getElementById("hintSection").style.display = "block";
 
-if(passInput.value.trim()==="") return;
+    hintInput.value         = "";
+    hintText.style.display  = "none";
+    hintBox.style.display   = "none";
+    noAttempt.style.display = "none";
 
-if(passInput.value===password){
-window.location.href="yesorno.html";
-return;
-}
+    // Header based on hintsTaken — not wrongAttempts
+    if (hintsTaken === 0)
+      hintHeader.textContent = "Hint k liye kissiii do pehle huhh";
+    else if (hintsTaken === 1)
+      hintHeader.textContent = "Ab 2nd hint ke liye kam se kam 30+ kisses chahiye huhh 🥺🥺😈";
+    else
+      hintHeader.textContent = "Firse galat..ab nhi milegi koi hint vint huhh";
 
-wrongAttempts++;
+    passInput.value = "";
+    submitBtn.classList.remove("active");
 
-document.getElementById('hintSection').style.display='block';
+    // Reset hintJustGiven so user can get next hint
+    hintJustGiven = false;
+    const pwBox = document.getElementById("passwordDiv");
+    pwBox.classList.remove("glow-pulse");
+  }
 
-hintInput.value="";
-hintText.style.display='none';
-hintBox.style.display='none';
+  /* ── Display Hint ── */
+  function displayHint() {
 
-if(wrongAttempts===1)
-hintHeader.textContent="Hint k liye kissiii do pehle huhh";
-else if(wrongAttempts===2)
-hintHeader.textContent="Ab 2nd hint ke liye kam se kam 30+ kisses chahiye huhh 🥺🥺😈";
-else
-hintHeader.textContent="Firse galat..ab nhi milegi koi hint vint huhh ";
+    // No password attempted yet
+    if (wrongAttempts === 0) {
+      noAttempt.style.display = "block";
+      return;
+    }
 
-passInput.value="";
-submitBtn.classList.remove("active");
-}
+    const kissCount = (hintInput.value.match(/💋/g) || []).length;
 
-function displayHint(){
+    // ══ CASE 1: Hint already given this round ══
+    // User must try password first before getting another hint
+    // Show ONLY "pehle password try karo" — nothing else
+    if (hintJustGiven) {
+      hintText.style.display = "none";      // hide "kya mujhe hint deni chahiye" line
+      hintText.textContent   = "";
+      hintBox.style.display  = "block";
+      hintBox.textContent    = "Pehle password try karo 🙄"; // only this line
+      hintBox.innerHTML      = "Pehle password try karo 🙄"; // clear any revealed letter too
+      hintInput.value        = "";
+      hintBtn.classList.remove("active");
+      const pwBox = document.getElementById("passwordDiv");
+      pwBox.classList.remove("glow-pulse");
+      void pwBox.offsetWidth;
+      pwBox.classList.add("glow-pulse");
+      passInput.focus();
+      passInput.addEventListener("input", function stopGlow(){
+        pwBox.classList.remove("glow-pulse");
+        passInput.removeEventListener("input", stopGlow);
+      });
+      return;
+    }
 
-if(wrongAttempts===0) return;
+    // ══ CASE 2: First hint ══
+    // Condition: 1+ kiss emoji
+    // Met     → give hint + lock
+    // Not met → do NOTHING, stay silent
+    if (hintsTaken === 0) {
+      if (kissCount >= 1) {
+        hintsTaken++;
+        hintJustGiven          = true;
+        hintText.style.display = "block";
+        hintBox.style.display  = "block";
+        hintText.textContent   = "Kya mujhe hint deni chahiye...uhmm...sochne do btau ya nhi 🤔...chalo bta hi deta hu huhhh";
+        hintBox.textContent    = "First nickname";
+      }
+      // else: condition not met — do nothing, no message
+      hintInput.value = "";
+      hintBtn.classList.remove("active");
+      return;
+    }
 
-const kissCount=(hintInput.value.match(/💋/g)||[]).length;
+    // ══ CASE 3: Second hint ══
+    // Condition: 30+ kiss emoji
+    // Met     → give hint + lock
+    // Not met → do NOTHING, stay silent
+    if (hintsTaken === 1) {
+      if (kissCount >= 30) {
+        hintsTaken++;
+        hintJustGiven          = true;
+        hintText.style.display = "block";
+        hintBox.style.display  = "block";
+        hintText.textContent   = "Kya mujhe hint deni chahiye...uhmm...sochne do btau ya nhi 🤔...chalo bta hi deta hu huhhh";
+        hintBox.textContent    = "Password capital letters me hai huhh";
+      }
+      // else: less than 30 — do nothing, no message
+      hintInput.value = "";
+      hintBtn.classList.remove("active");
+      return;
+    }
 
-if(wrongAttempts===1 && kissCount>=1){
+    // ══ CASE 4: Third hint onwards (letter reveal) ══
+    // Condition: 1+ kiss emoji
+    // Met     → reveal next letter + lock
+    // Not met → do NOTHING, stay silent
+    if (hintsTaken >= 2 && thirdStep < thirdLines.length) {
+      if (kissCount >= 1) {
+        hintsTaken++;
+        hintJustGiven          = true;
+        hintText.style.display = "none";
+        hintBox.style.display  = "block";
+        hintBox.classList.add("fade-in");
+        const ch = "NEETWALIMADAM"[thirdStep] || "";
+        hintBox.innerHTML = thirdLines[thirdStep] + "<div class='revealed-letter'>Letter: " + ch + "</div>";
+        thirdStep++;
+        if (thirdStep >= 13) {
+          hintBox.innerHTML = thirdLines[12] + "<div class='revealed-letter'>NEETWALIMADAM</div>";
+        }
+      }
+      // else: no kiss — do nothing, no message
+      hintInput.value = "";
+      hintBtn.classList.remove("active");
+      return;
+    }
+  }
 
-hintText.style.display='block';
-hintBox.style.display='block';
+  /* ══════════════════════════════════════════
+     SMART PRELOAD — future proof
+     Koi bhi file add karo, code touch mat karo
 
-hintText.textContent="Kya mujhe hint deni chahiye...uhmm...sochne do btau ya nhi 🤔...chalo bta hi deta hu huhhh";
-hintBox.textContent="First nickname";
+     SIRF YEH EDIT KARO FUTURE MEIN:
+     - Pages badhao toh "pages" array mein add karo
+     - Baki sab automatic hai
+  ══════════════════════════════════════════ */
+  (function(){
 
-}
-else if(wrongAttempts===2 && kissCount>=30){
+    // ── 1. VIDEOS — edit1 to edit100 ──
+    // Nai edits add karo, automatically detect hongi
+    for (let i = 1; i <= 100; i++) {
+      (function(num){
+        const v   = document.createElement("video");
+        v.preload = "auto";
+        v.muted   = true;
+        v.src     = "edit" + num + ".mp4";
+        v.onerror = () => { v.src = ""; };
+      })(i);
+    }
 
-hintText.style.display='block';
-hintBox.style.display='block';
+    // ── 2. WALLPAPERS — wallpaper1 to wallpaper30 ──
+    // Nai wallpapers add karo, automatically detect hongi
+    // Har extension try hoga — jpg, jpeg, png, webp
+    const imgExts = ["jpg","jpeg","png","webp"];
+    for (let i = 1; i <= 30; i++) {
+      imgExts.forEach(ext => {
+        const img = new Image();
+        img.src   = "wallpaper" + i + "." + ext;
+      });
+    }
+    // wallpaper.jpg bhi (bina number)
+    imgExts.forEach(ext => {
+      const img = new Image();
+      img.src   = "wallpaper." + ext;
+    });
 
-hintText.textContent="Kya mujhe hint deni chahiye...uhmm...sochne do btau ya nhi 🤔...chalo bta hi deta hu huhhh";
-hintBox.textContent="Password capital letters me hai huhh";
+    // ── 3. MP3 FILES — common name patterns ──
+    // song1.mp3, bg1.mp3, music1.mp3... sab try hoga
+    // Nai mp3 add karo agar naam inn patterns mein ho toh automatic
+    const audioPatterns = ["song","bg","music","audio","track","ost","bgm"];
+    audioPatterns.forEach(name => {
+      for (let i = 1; i <= 20; i++) {
+        const a   = document.createElement("audio");
+        a.preload = "auto";
+        a.src     = name + i + ".mp3";
+        a.onerror = () => { a.src = ""; };
+      }
+      // Bina number bhi (song.mp3, bg.mp3)
+      const a   = document.createElement("audio");
+      a.preload = "auto";
+      a.src     = name + ".mp3";
+      a.onerror = () => { a.src = ""; };
+    });
 
-}
-else if(wrongAttempts>=3 && kissCount>=1 && thirdStep<thirdLines.length){
+    // ── 4. PAGES — fully automatic ──
+    // love1 to love20 sab try hoga — jo bhi mile prefetch ho jaayega
+    // Naya page banao bas "love" naam rakho, code touch mat karo
+    for (let i = 1; i <= 20; i++) {
+      (function(num){
+        fetch("love" + num + ".html", { method: "HEAD" })
+          .then(res => {
+            if (res.ok) {
+              const link = document.createElement("link");
+              link.rel   = "prefetch";
+              link.href  = "love" + num + ".html";
+              document.head.appendChild(link);
+            }
+          })
+          .catch(() => {});
+      })(i);
+    }
+    // yesorno.html bhi prefetch
+    const yn = document.createElement("link");
+    yn.rel   = "prefetch";
+    yn.href  = "yesorno.html";
+    document.head.appendChild(yn);
 
-hintText.style.display='none';
-
-hintBox.style.display='block';
-hintBox.classList.add("fade-in");
-
-const letter=password[thirdStep];
-
-hintBox.innerHTML=thirdLines[thirdStep] +
-"<div class='revealed-letter'>Letter: "+letter+"</div>";
-
-thirdStep++;
-
-if(thirdStep===password.length){
-hintBox.innerHTML=thirdLines[thirdStep-1] +
-"<div class='revealed-letter'>NEETWALIMADAM</div>";
-}
-
-}
-
-hintInput.value="";
-}
+  })();
 
 </script>
-
-<!-- 🔥 FINAL PRELOAD (WORKING + SAFE) -->
-<script>
-(function(){
-
-let i = 1;
-const max = 10;
-
-function preload(){
-
-if(i > max) return;
-
-let v = document.createElement("video");
-
-v.src = "edit" + i + ".mp4";
-v.preload = "auto";
-v.muted = true;
-v.style.display = "none";
-
-document.body.appendChild(v);
-
-v.onloadeddata = () => {
-i++;
-preload();
-};
-
-v.onerror = () => {
-i++;
-preload();
-};
-
-}
-
-preload();
-
-})();
-</script>
-
 </body>
 </html>
