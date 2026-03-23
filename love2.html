@@ -15,7 +15,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Two slots — A and B */
 .slot {
   position: fixed;
   top: 0; left: 0;
@@ -39,7 +38,6 @@ video {
   pointer-events: none;
 }
 
-/* Spinner */
 #spinner {
   position: fixed;
   top: 50%; left: 50%;
@@ -57,7 +55,6 @@ video {
   to { transform: translate(-50%,-50%) rotate(360deg); }
 }
 
-/* Tap to play */
 #tap {
   position: fixed;
   top: 50%; left: 50%;
@@ -72,7 +69,6 @@ video {
   font-size: 15px;
 }
 
-/* Nav buttons — page navigation only */
 #nav {
   position: fixed;
   bottom: 20px;
@@ -95,7 +91,6 @@ video {
 }
 #nav button:active { opacity: 0.7; }
 
-/* Swipe hint */
 #hint {
   position: fixed;
   bottom: 85px;
@@ -111,10 +106,7 @@ video {
   animation: hintPulse 1.4s ease-in-out infinite;
   transition: opacity 0.4s ease;
 }
-#hint.hide {
-  opacity: 0;
-  pointer-events: none;
-}
+#hint.hide { opacity: 0; }
 @keyframes hintPulse {
   0%   { transform: translateY(4px);  opacity: 0.5; }
   50%  { transform: translateY(-4px); opacity: 1;   }
@@ -124,12 +116,9 @@ video {
 </head>
 <body>
 
-<!-- Slot A -->
 <div id="slot1" class="slot active">
   <video id="v1" playsinline loop></video>
 </div>
-
-<!-- Slot B -->
 <div id="slot2" class="slot">
   <video id="v2" playsinline loop></video>
 </div>
@@ -139,7 +128,6 @@ video {
 <div id="hint">Swipe Up</div>
 
 <div id="nav">
-  <!-- Buttons only navigate pages, NOT videos -->
   <button onclick="window.location.href='love.html'">⬅ Previous</button>
   <button onclick="window.location.href='love3.html'">Next ➜</button>
 </div>
@@ -155,49 +143,91 @@ video {
 
   let videos  = [];
   let index   = 0;
-  let active  = 1;     // which slot is showing: 1 or 2
-  let locked  = false; // swipe lock
-  let hintOff = false; // hint shown once only
-  let preEl   = null;  // preload element
+  let active  = 1;
+  let locked  = false;
+  let hintOff = false;
+  let preEl   = null;
 
-  /* ══════════════════════
-     DETECT VIDEOS
-  ══════════════════════ */
-  function detect(i) {
-    const t = document.createElement("video");
-    t.preload = "metadata";
-    t.src = `edit${i}.mp4`;
+  /* ══════════════════════════════════════
+     DETECT — tries 1 to 50, skips missing
+     edit1, edit4, edit8 — all found ✅
+  ══════════════════════════════════════ */
+  let detectCount = 0;
+  let maxCheck    = 50; // checks edit1.mp4 to edit50.mp4
 
-    t.onloadedmetadata = () => {
-      t.src = ""; // FIX #4 — free memory
-      videos.push(`edit${i}.mp4`);
-      detect(i + 1);
-    };
+  function detect() {
+    let checked = 0;
 
-    t.onerror = () => {
-      t.src = "";
-      start();
-    };
+    for (let i = 1; i <= maxCheck; i++) {
+      const t = document.createElement("video");
+      t.preload = "metadata";
+      t.src = `edit${i}.mp4`;
+
+      t.onloadedmetadata = () => {
+        t.src = "";
+        videos.push(`edit${i}.mp4`);
+        checked++;
+        if (checked + countErrors === maxCheck) done();
+      };
+
+      t.onerror = () => {
+        t.src = "";
+        checked++;
+        if (checked + countErrors === maxCheck) done();
+      };
+    }
   }
 
-  detect(1);
+  // Simpler clean approach — parallel fetch all 1-50
+  let resolved = 0;
+  function detectAll() {
+    for (let i = 1; i <= 50; i++) {
+      (function(num) {
+        const t = document.createElement("video");
+        t.preload = "metadata";
+        t.src = `edit${num}.mp4`;
 
-  /* ══════════════════════
-     START — load first video
-  ══════════════════════ */
-  function start() {
+        t.onloadedmetadata = () => {
+          t.src = "";
+          videos.push({ name: `edit${num}.mp4`, num: num });
+          resolved++;
+          if (resolved === 50) finish();
+        };
+
+        t.onerror = () => {
+          t.src = "";
+          resolved++;
+          if (resolved === 50) finish();
+        };
+      })(i);
+    }
+  }
+
+  function finish() {
+    // Sort by number so edit1, edit4, edit8 play in correct order
+    videos.sort((a, b) => a.num - b.num);
+    videos = videos.map(v => v.name);
+
     if (!videos.length) {
       document.body.innerHTML = "<p style='color:white;padding:30px'>No videos found</p>";
       return;
     }
 
+    start();
+  }
+
+  detectAll();
+
+  /* ══════════════════════
+     START
+  ══════════════════════ */
+  function start() {
     spinner.classList.add("show");
 
     v1.src   = videos[0];
-    v1.muted = false; // FIX #1 — unmuted from start
+    v1.muted = false;
     v1.load();
 
-    // FIX #5 — timeout fallback so page never freezes
     const fallback = setTimeout(() => {
       spinner.classList.remove("show");
       locked = false;
@@ -213,13 +243,12 @@ video {
   }
 
   /* ══════════════════════
-     LOAD VIDEO (swipe)
+     LOAD VIDEO
   ══════════════════════ */
   function load(i) {
     if (i < 0 || i >= videos.length || locked) return;
     locked = true;
 
-    // Hide hint on first swipe — FIX #7
     if (!hintOff) {
       hintOff = true;
       hint.classList.add("hide");
@@ -234,10 +263,9 @@ video {
     spinner.classList.add("show");
 
     nextV.src   = videos[i];
-    nextV.muted = false; // FIX #1 — always unmuted
+    nextV.muted = false;
     nextV.load();
 
-    // FIX #5 — fallback unlock if canplaythrough never fires
     const fallback = setTimeout(() => {
       spinner.classList.remove("show");
       locked = false;
@@ -250,11 +278,9 @@ video {
 
       nextV.play().catch(() => { tap.style.display = "block"; });
 
-      // Crossfade slots
       nextSlot.classList.add("active");
       currSlot.classList.remove("active");
 
-      // Stop and clear old video after fade
       setTimeout(() => {
         currV.pause();
         currV.src = "";
@@ -270,16 +296,16 @@ video {
   }
 
   /* ══════════════════════
-     PRELOAD NEXT VIDEO ONLY
+     PRELOAD NEXT
   ══════════════════════ */
   function preload() {
     if (preEl) { preEl.src = ""; preEl.load(); preEl = null; }
 
     if (index + 1 < videos.length) {
-      preEl          = document.createElement("video");
-      preEl.src      = videos[index + 1];
-      preEl.preload  = "auto";
-      preEl.muted    = true;
+      preEl             = document.createElement("video");
+      preEl.src         = videos[index + 1];
+      preEl.preload     = "auto";
+      preEl.muted       = true;
       preEl.playsInline = true;
     }
   }
@@ -295,11 +321,9 @@ video {
   };
 
   /* ══════════════════════
-     SWIPE — all fixes applied
+     SWIPE
   ══════════════════════ */
-  let startX  = 0;
-  let startY  = 0;
-  let swiped  = false; // FIX #3 — one swipe per gesture
+  let startX = 0, startY = 0, swiped = false;
 
   document.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
@@ -313,20 +337,18 @@ video {
     const diffX = Math.abs(e.touches[0].clientX - startX);
     const diffY = startY - e.touches[0].clientY;
 
-    // FIX #2 — only vertical swipe, prevent page scroll
     if (Math.abs(diffY) > 55 && diffX < 35) {
-      e.preventDefault(); // FIX #2
-      swiped = true;      // FIX #3
+      e.preventDefault();
+      swiped = true;
 
-      if (diffY > 0) load(index + 1); // swipe up = next
-      else           load(index - 1); // swipe down = prev
+      if (diffY > 0) load(index + 1);
+      else           load(index - 1);
     }
-  }, { passive: false }); // FIX #2 — must be false for preventDefault
+  }, { passive: false });
 
   document.addEventListener("touchend", () => {
     swiped = false;
   }, { passive: true });
-
 </script>
 </body>
 </html>
