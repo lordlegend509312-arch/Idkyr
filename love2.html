@@ -12,6 +12,8 @@ html, body {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  position: fixed;        /* prevents ANY scroll on iOS */
+  touch-action: none;     /* blocks browser scroll on all mobile */
 }
 
 .slot {
@@ -220,6 +222,7 @@ video {
     // Remove old handler
     if (vid._handler) {
       vid.removeEventListener("canplaythrough", vid._handler);
+      vid.removeEventListener("canplay", vid._handler);
       vid._handler = null;
     }
 
@@ -229,23 +232,44 @@ video {
     vid.loop  = true;
     vid.load();
 
-    // Safety fallback — unlock after 5s
+    let fired = false; // prevent double fire
+
+    // Safety fallback — unlock after 4s no matter what
     const fallback = setTimeout(() => {
+      if (fired) return;
+      fired = true;
+      if (vid._handler) {
+        vid.removeEventListener("canplaythrough", vid._handler);
+        vid.removeEventListener("canplay", vid._handler);
+        vid._handler = null;
+      }
       spinner.classList.remove("show");
       locked = false;
+      vid.play().catch(() => { tap.style.display = "block"; });
       onReady && onReady();
-    }, 5000);
+    }, 4000);
 
     vid._handler = () => {
+      if (fired) return;
+      fired = true;
       vid.removeEventListener("canplaythrough", vid._handler);
+      vid.removeEventListener("canplay", vid._handler);
       vid._handler = null;
       clearTimeout(fallback);
       spinner.classList.remove("show");
+      locked = false; // unlock here too — not just in onReady
       vid.play().catch(() => { tap.style.display = "block"; });
       onReady && onReady();
     };
 
+    // Listen to BOTH canplay and canplaythrough — whichever fires first
+    vid.addEventListener("canplay", vid._handler);
     vid.addEventListener("canplaythrough", vid._handler);
+
+    // If already ready (preloaded) — fire immediately
+    if (vid.readyState >= 2) {
+      vid._handler();
+    }
   }
 
   /* ══════════════════════
